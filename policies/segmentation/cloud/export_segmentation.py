@@ -2,6 +2,7 @@
 Output: per-frame PNGs, overlay video, and a JSON file with RLE-encoded masks for reconstruction.
 """
 import modal
+import sys
 import os
 import zlib
 import json
@@ -219,10 +220,12 @@ def run_segmentation_export(video_bytes: bytes, duration_s: float = 30.0):
 def main():
     import numpy as np
 
-    base = os.path.dirname(os.path.abspath(__file__))
-    data_dir = os.path.join(base, "Caddy-Training-Data-2026-05-03_16-08-00")
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    from segdrive.paths import DATA_DIR, SEG_EXPORT_DIR
+
+    data_dir = str(DATA_DIR)
     video_path = os.path.join(data_dir, "front-wide.mp4")
-    output_dir = os.path.join(base, "seg_export_output")
+    output_dir = str(SEG_EXPORT_DIR)
     os.makedirs(output_dir, exist_ok=True)
 
     print(f"Reading {video_path}...")

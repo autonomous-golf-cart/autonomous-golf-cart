@@ -1,36 +1,18 @@
 """Client-side rendering of Mask2Former segmentation + depth into side-by-side videos with 3D BEV.
-Requires both depth_modal.py and seg_modal.py to have been run first.
+Requires cloud/depth_yolo.py and cloud/segment_videos.py to have been run first.
 Re-run anytime you change visualization params without re-running inference.
 """
 import numpy as np
 import cv2
-import json
-import math
 import os
 import subprocess
 import time
+import sys
 
-CITYSCAPES_COLORS = [
-    (128, 64, 128),   # 0  road
-    (244, 35, 232),   # 1  sidewalk
-    (70, 70, 70),     # 2  building
-    (102, 102, 156),  # 3  wall
-    (190, 153, 153),  # 4  fence
-    (153, 153, 153),  # 5  pole
-    (250, 170, 30),   # 6  traffic light
-    (220, 220, 0),    # 7  traffic sign
-    (107, 142, 35),   # 8  vegetation
-    (152, 251, 152),  # 9  terrain
-    (70, 130, 180),   # 10 sky
-    (220, 20, 60),    # 11 person
-    (255, 0, 0),      # 12 rider
-    (0, 0, 142),      # 13 car
-    (0, 0, 70),       # 14 truck
-    (0, 60, 100),     # 15 bus
-    (0, 80, 100),     # 16 train
-    (0, 0, 230),      # 17 motorcycle
-    (119, 11, 32),    # 18 bicycle
-]
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from segdrive.cityscapes import CITYSCAPES_COLORS
+from segdrive.paths import DATA_DIR, DEPTH_DIR, load_calib
 
 # Cityscapes obstacle classes for self-driving (BGR colors for OpenCV)
 OBSTACLE_SEG = {
@@ -294,13 +276,9 @@ def render_video(video_path, depth_npz_path, seg_npz_path, output_path, calib):
 
 
 def main():
-    base = os.path.dirname(os.path.abspath(__file__))
-    data_dir = os.path.join(base, "Caddy-Training-Data-2026-05-03_16-08-00")
-    depth_dir = os.path.join(base, "depth_output")
-    calib_path = os.path.join(base, "camera_calibration.json")
-
-    with open(calib_path) as f:
-        calib = json.load(f)
+    data_dir = str(DATA_DIR)
+    depth_dir = str(DEPTH_DIR)
+    calib = load_calib()
 
     for name in ["front-wide", "front-narrow"]:
         video_path = os.path.join(data_dir, f"{name}.mp4")
@@ -309,10 +287,10 @@ def main():
         output_path = os.path.join(depth_dir, f"{name}_seg_3d.mp4")
 
         if not os.path.exists(depth_npz):
-            print(f"Skipping {name} - no depth data (run depth_modal.py first)")
+            print(f"Skipping {name} - no depth data (run cloud/depth_yolo.py first)")
             continue
         if not os.path.exists(seg_npz):
-            print(f"Skipping {name} - no seg data (run seg_modal.py first)")
+            print(f"Skipping {name} - no seg data (run cloud/segment_videos.py first)")
             continue
 
         render_video(video_path, depth_npz, seg_npz, output_path, calib)

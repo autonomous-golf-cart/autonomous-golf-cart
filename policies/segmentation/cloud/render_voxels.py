@@ -4,6 +4,7 @@ Voxel volume: 30ft x 90ft x 10ft (9.1m x 27.4m x 3.0m).
 Rendered at half resolution with nearest-neighbor upscale for blocky voxel look.
 """
 import modal
+import sys
 import os
 import json
 
@@ -278,11 +279,13 @@ def render_voxel_video(video_bytes: bytes, depth_npz_bytes: bytes, seg_npz_bytes
 def main():
     import numpy as np
 
-    base = os.path.dirname(os.path.abspath(__file__))
-    data_dir = os.path.join(base, "Caddy-Training-Data-2026-05-03_16-08-00")
-    depth_dir = os.path.join(base, "depth_output")
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    from segdrive.paths import CALIB_PATH, DATA_DIR, DEPTH_DIR
 
-    with open(os.path.join(base, "camera_calibration.json")) as f:
+    data_dir = str(DATA_DIR)
+    depth_dir = str(DEPTH_DIR)
+
+    with open(CALIB_PATH) as f:
         calib_json = f.read()
 
     handles = {}

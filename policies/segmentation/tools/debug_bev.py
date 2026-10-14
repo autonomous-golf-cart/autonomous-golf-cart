@@ -1,14 +1,24 @@
-import numpy as np
-import cv2
-import json
+"""Sanity-check the BEV projection with a synthetic segmentation map.
+
+Paints a fake road / sidewalk / vegetation / sky layout over a frame, projects
+it to BEV, and writes the side-by-side to outputs/debug/.
+
+    python tools/debug_bev.py [frame.jpg]    # default: calibration/calibration_frame.jpg
+"""
+import os
 import sys
-sys.path.insert(0, ".")
-from eval_segmentation import create_bev, create_overlay, CITYSCAPES_COLORS
 
-with open("camera_calibration.json") as f:
-    calib = json.load(f)
+import cv2
+import numpy as np
 
-frame = cv2.imread("/tmp/test_frame.jpg")
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from segdrive.bev import create_bev, create_overlay
+from segdrive.paths import CALIB_PATH, OUTPUT_DIR, load_calib
+
+calib = load_calib()
+frame_path = sys.argv[1] if len(sys.argv) > 1 else str(CALIB_PATH.parent / "calibration_frame.jpg")
+frame = cv2.imread(frame_path)
 h, w = frame.shape[:2]
 
 # Manual segmentation: road in lower portion, vegetation on sides, sky on top
@@ -29,7 +39,7 @@ for row in range(int(h*0.5), h):
     seg[row, max(0, int(w*(0.12-t*0.12))):int(w*(0.18-t*0.08))] = 1
     seg[row, int(w*(0.82+t*0.08)):min(w, int(w*(0.88+t*0.12)))] = 1
 
-bev_color, _ = create_bev(seg, calib)
+bev_color = create_bev(seg, calib)
 
 # Create overlay
 frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -42,6 +52,8 @@ bev_resized = cv2.resize(bev_bgr, (480, 480))
 canvas = np.zeros((480, 640 + 480, 3), dtype=np.uint8)
 canvas[:, :640] = overlay_bgr
 canvas[:, 640:] = bev_resized
-cv2.imwrite("/tmp/bev_v2.jpg", canvas)
-cv2.imwrite("/tmp/bev_v2_only.jpg", bev_bgr)
-print("Saved /tmp/bev_v2.jpg and /tmp/bev_v2_only.jpg")
+out_dir = OUTPUT_DIR / "debug"
+out_dir.mkdir(parents=True, exist_ok=True)
+cv2.imwrite(str(out_dir / "bev_side_by_side.jpg"), canvas)
+cv2.imwrite(str(out_dir / "bev_only.jpg"), bev_bgr)
+print(f"Saved {out_dir}/bev_side_by_side.jpg and bev_only.jpg")

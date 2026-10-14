@@ -2,7 +2,7 @@
 """
 segmentation_infer.py — drive-by-segmentation live planner sidecar.
 
-Uses the drive-by-segmentation implementation in the parent directory for SegFormer semantic segmentation, BEV projection,
+Uses the segdrive package in the parent directory for SegFormer semantic segmentation, BEV projection,
 lane-aware trajectory planning, and steering estimation. Publishes the
 same /tmp contract as the other model sidecars:
 
@@ -603,13 +603,14 @@ def make_sources(args) -> list[CameraReader | VideoReader | RealSenseReader]:
 
 
 def import_segmentation_stack(repo_dir: Path):
-    if not (repo_dir / "live.py").exists():
-        raise RuntimeError(f"drive-by-segmentation repo not found at {repo_dir}")
+    if not (repo_dir / "segdrive").is_dir():
+        raise RuntimeError(f"segdrive package not found in {repo_dir}")
     sys.path.insert(0, str(repo_dir))
-    import live as seg_live
-    import render_trajectories as rt
-    from path_planning import lane_aware_centerline_path
-    from render import CITYSCAPES_COLORS, create_bev, create_overlay
+    from segdrive import draw as rt
+    from segdrive import segformer as seg_live
+    from segdrive.bev import create_bev, create_overlay
+    from segdrive.cityscapes import CITYSCAPES_COLORS
+    from segdrive.planning import lane_aware_centerline_path
 
     return seg_live, rt, lane_aware_centerline_path, create_bev, create_overlay, CITYSCAPES_COLORS
 
@@ -902,16 +903,15 @@ def main() -> None:
     else:
         device = "cpu"
 
-    with (args.seg_repo / "camera_calibration.json").open() as f:
+    with (args.seg_repo / "calibration" / "camera_calibration.json").open() as f:
         calib = json.load(f)
 
-    bev_range = calib.get("bev_range", {})
-    rt.RANGE_FWD = bev_range.get("forward_ft", 50) * rt.FT_TO_M
-    rt.RANGE_SIDE = bev_range.get("side_ft", 25) * rt.FT_TO_M
+    rt.set_bev_range(calib)
     road_width_ft = float(calib.get("road_width_ft", 20.0))
 
     proc, model = seg_live.load_segformer(args.model, device)
-    steer_est = rt.SteeringEstimator()
+    from segdrive.steering import SteeringEstimator
+    steer_est = SteeringEstimator()
 
     readers = make_sources(args)
     for r in readers:

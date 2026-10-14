@@ -1,12 +1,22 @@
-"""Quick test: run lane-aware centerline on a few frames and save debug images."""
-import numpy as np
-import cv2
-import json
+"""Run the lane-aware centerline planner on a few frames and save debug images.
+
+Needs outputs/eval/segformer/seg_maps.npz (from cloud/eval_segmentation.py).
+
+    python tools/debug_lane_planner.py
+"""
 import os
+import sys
 import time
 
-from render import create_bev, CITYSCAPES_COLORS
-from path_planning import (
+import cv2
+import numpy as np
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from segdrive.bev import create_bev
+from segdrive.cityscapes import CITYSCAPES_COLORS
+from segdrive.paths import DATA_DIR, EVAL_DIR, load_calib
+from segdrive.planning import (
     load_gps_route, get_ego_from_gps,
     lane_aware_centerline_path,
     map_route_to_bev, load_map_route, localize_on_map_route, get_map_route_ahead,
@@ -40,17 +50,14 @@ def draw_traj(img, traj, color, thickness=3, label=None):
 
 
 def main():
-    base = os.path.dirname(os.path.abspath(__file__))
-    data_dir = os.path.join(base, "Caddy-Training-Data-2026-05-03_16-08-00")
-    calib_path = os.path.join(base, "camera_calibration.json")
+    data_dir = str(DATA_DIR)
     gps_path = os.path.join(data_dir, "gps.json")
     map_route_path = os.path.join(data_dir, "map_route.json")
-    seg_dir = os.path.join(base, "eval_output", "segformer")
-    out_dir = os.path.join(base, "eval_output", "lane_debug")
+    seg_dir = str(EVAL_DIR / "segformer")
+    out_dir = str(EVAL_DIR / "lane_debug")
     os.makedirs(out_dir, exist_ok=True)
 
-    with open(calib_path) as f:
-        calib = json.load(f)
+    calib = load_calib()
 
     gps_route, ref_lat, ref_lon = load_gps_route(gps_path)
     map_route = load_map_route(map_route_path, ref_lat, ref_lon)

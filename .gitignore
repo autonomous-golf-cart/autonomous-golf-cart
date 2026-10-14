@@ -26,3 +26,6 @@ Caddy-Training-Data-*/
 eval_output/
 depth_output/
 frame_samples/
+policies/segmentation/data/
+policies/segmentation/outputs/
+policies/segmentation/models/

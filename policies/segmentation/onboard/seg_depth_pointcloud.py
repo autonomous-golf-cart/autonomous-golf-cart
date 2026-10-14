@@ -7,7 +7,7 @@ The main offline path this supports is the drive-by-segmentation output:
     scripts/seg_depth_pointcloud.py \
         --depth /path/to/depth_maps.npz \
         --seg /path/to/seg_maps_30fps.npz \
-        --calib policies/segmentation/camera_calibration.json \
+        --calib policies/segmentation/calibration/camera_calibration.json \
         --frame 0 \
         --output occupied_cloud.ply
 
@@ -60,7 +60,7 @@ SEGFORMER_MODELS = {
 
 DEFAULT_LIVE_OUTPUT = Path("/tmp/cart_pointcloud/occupied_cloud.ply")
 DEFAULT_LIVE_STATE = Path("/tmp/cart_pointcloud/state.json")
-DEFAULT_CALIB = Path(__file__).resolve().parent.parent / "camera_calibration.json"
+DEFAULT_CALIB = Path(__file__).resolve().parent.parent / "calibration" / "camera_calibration.json"
 
 CLASS_ALIASES = {
     # Physical scene classes that should generally block free space.

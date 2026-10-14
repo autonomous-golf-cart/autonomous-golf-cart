@@ -1,5 +1,6 @@
 """Run Depth Anything V2 + YOLOv11 on Modal A100 for depth estimation and object detection."""
 import modal
+import sys
 import os
 import json
 import zlib
@@ -172,9 +173,11 @@ def run_depth_and_yolo(video_bytes: bytes, video_name: str):
 def main():
     import numpy as np
 
-    base = os.path.dirname(os.path.abspath(__file__))
-    data_dir = os.path.join(base, "Caddy-Training-Data-2026-05-03_16-08-00")
-    output_dir = os.path.join(base, "depth_output")
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    from segdrive.paths import DATA_DIR, DEPTH_DIR
+
+    data_dir = str(DATA_DIR)
+    output_dir = str(DEPTH_DIR)
 
     videos = {
         "front-wide": os.path.join(data_dir, "front-wide.mp4"),
@@ -224,4 +227,4 @@ def main():
         print(f"  Detections: {vid_dir}/detections.json")
 
     print(f"\nAll data saved to {output_dir}/")
-    print("Run 'python3 render_depth.py' to generate output videos.")
+    print("Run 'python3 tools/render_depth.py' to generate output videos.")

@@ -1,14 +1,18 @@
 """Client-side rendering of depth + YOLO results into side-by-side videos with 3D BEV.
-Run after depth_modal.py to generate visualization videos. No GPU needed.
+Run after cloud/depth_yolo.py to generate visualization videos. No GPU needed.
 Re-run anytime you change visualization params without re-running inference.
 """
 import numpy as np
 import cv2
 import json
-import math
 import os
 import subprocess
 import time
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from segdrive.paths import DATA_DIR, DEPTH_DIR, load_calib
 
 # COCO classes relevant for self-driving obstacle avoidance (BGR colors)
 OBSTACLE_COLORS = {
@@ -257,13 +261,9 @@ def render_video(video_path, depth_npz_path, det_json_path, output_path, calib):
 
 
 def main():
-    base = os.path.dirname(os.path.abspath(__file__))
-    data_dir = os.path.join(base, "Caddy-Training-Data-2026-05-03_16-08-00")
-    depth_dir = os.path.join(base, "depth_output")
-    calib_path = os.path.join(base, "camera_calibration.json")
-
-    with open(calib_path) as f:
-        calib = json.load(f)
+    data_dir = str(DATA_DIR)
+    depth_dir = str(DEPTH_DIR)
+    calib = load_calib()
 
     for name in ["front-wide", "front-narrow"]:
         video_path = os.path.join(data_dir, f"{name}.mp4")
@@ -272,7 +272,7 @@ def main():
         output_path = os.path.join(depth_dir, f"{name}_3d.mp4")
 
         if not os.path.exists(depth_npz):
-            print(f"Skipping {name} - no depth data (run depth_modal.py first)")
+            print(f"Skipping {name} - no depth data (run cloud/depth_yolo.py first)")
             continue
 
         render_video(video_path, depth_npz, det_json, output_path, calib)

@@ -6,7 +6,7 @@ Two optimizations:
 1. ``BevRemap`` precomputes the static inverse-perspective map from BEV
    pixels to source-image pixels. Per-frame BEV is then a single advanced
    index + palette lookup + static overlay composite. ~10x faster than
-   ``render.create_bev``.
+   ``segdrive.bev.create_bev``.
 
 2. ``lane_aware_centerline_path_fast`` rewrites the planner's hot loop:
    ``cv2`` versions of erode / distance_transform / connectedComponents
@@ -50,7 +50,7 @@ def build_bev_remap(calib: dict, img_h: int, img_w: int,
                     bev_size: int = 500) -> BevRemap:
     """Precompute the inverse perspective + static overlays.
 
-    Mirrors ``drive-by-segmentation/render.create_bev`` projection math.
+    Mirrors ``segdrive.bev.create_bev`` projection math.
     """
     intr = calib["intrinsics"]
     # Two supported projection models:
@@ -262,7 +262,7 @@ def lane_aware_centerline_path_fast(
     road_width_ft: float = 20.0,
 ):
     """Lane-aware centerline planner — algorithm identical to
-    ``path_planning.lane_aware_centerline_path``, but scipy ops replaced
+    ``segdrive.planning.lane_aware_centerline_path``, but scipy ops replaced
     with their cv2 equivalents (binary_erosion → cv2.erode,
     distance_transform_edt → cv2.distanceTransform, label →
     cv2.connectedComponents). Preserves the wide-road / right-lane split

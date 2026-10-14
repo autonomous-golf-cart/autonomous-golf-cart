@@ -1,5 +1,6 @@
-"""Run Mask2Former segmentation at 30fps on Modal A100. Pairs with depth data from depth_modal.py."""
+"""Run Mask2Former segmentation at 30fps on Modal A100. Pairs with depth data from cloud/depth_yolo.py."""
 import modal
+import sys
 import os
 import zlib
 
@@ -111,9 +112,11 @@ def main():
     import numpy as np
     import json
 
-    base = os.path.dirname(os.path.abspath(__file__))
-    data_dir = os.path.join(base, "Caddy-Training-Data-2026-05-03_16-08-00")
-    output_dir = os.path.join(base, "depth_output")
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    from segdrive.paths import DATA_DIR, DEPTH_DIR
+
+    data_dir = str(DATA_DIR)
+    output_dir = str(DEPTH_DIR)
 
     videos = {
         "front-wide": os.path.join(data_dir, "front-wide.mp4"),
@@ -151,4 +154,4 @@ def main():
         print(f"  Peak GPU: {result['peak_gpu_mb']}MB")
 
     print(f"\nAll segmentation data saved to {output_dir}/")
-    print("Run 'python3 render_depth_seg.py' to generate output videos.")
+    print("Run 'python3 tools/render_depth_seg.py' to generate output videos.")

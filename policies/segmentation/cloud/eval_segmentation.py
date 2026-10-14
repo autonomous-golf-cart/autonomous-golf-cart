@@ -1,4 +1,12 @@
+"""Compare SegFormer, Mask2Former, and DDRNet on the front-wide drive video (Modal GPUs).
+
+Writes per-model seg_maps.npz + metrics.json to outputs/eval/. Render them with
+tools/render_segmentation.py.
+
+    modal run cloud/eval_segmentation.py
+"""
 import modal
+import sys
 import json
 import zlib
 from pathlib import Path
@@ -371,9 +379,11 @@ def main():
     import os
     import numpy as np
 
-    base = os.path.dirname(os.path.abspath(__file__))
-    video_path = os.path.join(base, "Caddy-Training-Data-2026-05-03_16-08-00", "front-wide.mp4")
-    output_dir = os.path.join(base, "eval_output")
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    from segdrive.paths import DATA_DIR, EVAL_DIR
+
+    video_path = str(DATA_DIR / "front-wide.mp4")
+    output_dir = str(EVAL_DIR)
     os.makedirs(output_dir, exist_ok=True)
 
     print(f"Reading video from {video_path}...")
@@ -439,4 +449,4 @@ def main():
         print(f"{label:<22} {vals[0]:>16} {vals[1]:>18} {vals[2]:>16}")
 
     print(f"\nAll seg maps saved to {output_dir}/")
-    print(f"Run 'python3 render.py' to generate overlay, BEV, and side-by-side videos locally.")
+    print(f"Run 'python3 tools/render_segmentation.py' to generate overlay, BEV, and side-by-side videos locally.")

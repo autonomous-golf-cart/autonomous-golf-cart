@@ -7,56 +7,21 @@ Usage:
   python live.py --model b2               # use SegFormer-B2 (heavier, better)
 """
 import argparse
-import json
-import math
-import os
 import time
 
 import cv2
 import numpy as np
 import torch
-from transformers import SegformerForSemanticSegmentation, SegformerImageProcessor
-from PIL import Image
 
-from render import create_bev, create_overlay, CITYSCAPES_COLORS
-from path_planning import lane_aware_centerline_path, map_route_to_bev
-from render_trajectories import (
-    SteeringEstimator, lookahead_point, draw_trajectory,
-    draw_steering_wheel, draw_gps_position, FT_TO_M,
-    RANGE_FWD, RANGE_SIDE, BEV_SIZE,
+from segdrive import draw
+from segdrive.bev import create_bev, create_overlay, road_mask_from_bev
+from segdrive.draw import draw_gps_position, draw_steering_wheel, draw_trajectory, lookahead_point
+from segdrive.paths import DATA_DIR, load_calib
+from segdrive.planning import (
+    get_ego_from_gps, lane_aware_centerline_path, load_gps_route, load_map_route, map_route_to_bev,
 )
-
-MODEL_VARIANTS = {
-    "b0": "nvidia/segformer-b0-finetuned-cityscapes-1024-1024",
-    "b2": "nvidia/segformer-b2-finetuned-cityscapes-1024-1024",
-    "b5": "nvidia/segformer-b5-finetuned-cityscapes-1024-1024",
-}
-
-ROAD_COLOR = np.array(CITYSCAPES_COLORS[0], dtype=np.uint8)
-GRID_COLOR = np.clip(np.array(CITYSCAPES_COLORS[0], dtype=np.int16) + 35, 0, 255).astype(np.uint8)
-GRID2_COLOR = np.clip(np.array(CITYSCAPES_COLORS[0], dtype=np.int16) + 70, 0, 255).astype(np.uint8)
-
-
-def load_segformer(variant, device):
-    name = MODEL_VARIANTS[variant]
-    print(f"Loading {name} on {device}...")
-    t0 = time.time()
-    proc = SegformerImageProcessor.from_pretrained(name)
-    model = SegformerForSemanticSegmentation.from_pretrained(name).to(device).eval()
-    params = sum(p.numel() for p in model.parameters()) / 1e6
-    print(f"  Loaded in {time.time()-t0:.1f}s ({params:.1f}M params)")
-    return proc, model
-
-
-def segment_frame(frame_rgb, proc, model, device):
-    pil = Image.fromarray(frame_rgb)
-    inputs = proc(images=pil, return_tensors="pt").to(device)
-    with torch.no_grad():
-        out = model(**inputs)
-    seg = proc.post_process_semantic_segmentation(
-        out, target_sizes=[frame_rgb.shape[:2]]
-    )[0].cpu().numpy().astype(np.uint8)
-    return seg
+from segdrive.segformer import MODEL_VARIANTS, load_segformer, pick_device, segment_frame
+from segdrive.steering import SteeringEstimator
 
 
 def build_display(overlay_bgr, bev_frame_rgb, steer_deg, fps, lane_ms, seg_ms):
@@ -101,32 +66,15 @@ def main():
                         help="Process every Nth frame (default: 1 = all)")
     args = parser.parse_args()
 
-    base = os.path.dirname(os.path.abspath(__file__))
-
-    if args.device:
-        device = args.device
-    elif torch.backends.mps.is_available():
-        device = "mps"
-    elif torch.cuda.is_available():
-        device = "cuda"
-    else:
-        device = "cpu"
-
-    with open(os.path.join(base, "camera_calibration.json")) as f:
-        calib = json.load(f)
-
-    import render_trajectories as rt
-    bev_range = calib.get("bev_range", {})
-    rt.RANGE_FWD = bev_range.get("forward_ft", 50) * FT_TO_M
-    rt.RANGE_SIDE = bev_range.get("side_ft", 25) * FT_TO_M
-    range_fwd = rt.RANGE_FWD
-    range_side = rt.RANGE_SIDE
-    bev_size = rt.BEV_SIZE
+    device = args.device or pick_device()
+    calib = load_calib()
+    range_fwd, range_side = draw.set_bev_range(calib)
+    bev_size = draw.BEV_SIZE
     road_width_ft = calib.get("road_width_ft", 20.0)
 
     # Determine video source
     if args.source is None:
-        src = os.path.join(base, "Caddy-Training-Data-2026-05-03_16-08-00", "front-wide.mp4")
+        src = str(DATA_DIR / "front-wide.mp4")
     elif args.source.isdigit():
         src = int(args.source)
     else:
@@ -142,10 +90,8 @@ def main():
     map_route = None
     mr_bx = mr_by = np.array([])
     try:
-        from path_planning import load_gps_route, load_map_route
-        data_dir = os.path.join(base, "Caddy-Training-Data-2026-05-03_16-08-00")
-        gps_route, ref_lat, ref_lon = load_gps_route(os.path.join(data_dir, "gps.json"))
-        map_route = load_map_route(os.path.join(data_dir, "map_route.json"), ref_lat, ref_lon)
+        gps_route, ref_lat, ref_lon = load_gps_route(DATA_DIR / "gps.json")
+        map_route = load_map_route(DATA_DIR / "map_route.json", ref_lat, ref_lon)
         print(f"Loaded map route ({len(map_route)} pts)")
     except Exception:
         print("No map route available — running without GPS/map overlay")
@@ -192,15 +138,12 @@ def main():
 
             # BEV
             bev_base = create_bev(seg_map, calib, bev_size)
-            road_mask = (np.all(bev_base == ROAD_COLOR, axis=-1) |
-                         np.all(bev_base == GRID_COLOR, axis=-1) |
-                         np.all(bev_base == GRID2_COLOR, axis=-1))
+            road_mask = road_mask_from_bev(bev_base)
 
             # Path planning
             t0 = time.perf_counter()
             if map_route is not None:
                 vid_t = cap.get(cv2.CAP_PROP_POS_FRAMES) / vid_fps
-                from path_planning import get_ego_from_gps
                 ego_x, ego_y, ego_yaw, _ = get_ego_from_gps(gps_route, vid_t)
                 mr_bx, mr_by = map_route_to_bev(
                     map_route, ego_x, ego_y, ego_yaw, bev_size, range_fwd, range_side

@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 """Interactive 3D point cloud viewer — orbit the scene while the video plays.
 Every depth pixel is back-projected to 3D and colored by segmentation class.
-Usage: python3 voxel_viewer.py [--camera front-wide] [--depth-scale 7.0]
+Usage: python3 tools/voxel_viewer.py [--camera front-wide] [--depth-scale 7.0]
 """
 import numpy as np
 import os
-import json
 import struct
 import re
 import time
@@ -14,6 +13,11 @@ import webbrowser
 import argparse
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from functools import lru_cache
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from segdrive.paths import DATA_DIR, DEPTH_DIR, load_calib
 
 SKIP_SKY = 10
 M_TO_FT = 3.28084
@@ -258,12 +262,9 @@ vid.addEventListener('loadedmetadata',()=>{seek.max=Math.floor(vid.duration*FPS)
 
 
 def init_data(camera_name, depth_scale):
-    base = os.path.dirname(os.path.abspath(__file__))
-    data_dir = os.path.join(base, "Caddy-Training-Data-2026-05-03_16-08-00")
-    depth_dir = os.path.join(base, "depth_output", camera_name)
-
-    with open(os.path.join(base, "camera_calibration.json")) as f:
-        calib = json.load(f)
+    data_dir = str(DATA_DIR)
+    depth_dir = str(DEPTH_DIR / camera_name)
+    calib = load_calib()
 
     da3_d = os.path.join(depth_dir, "da3_depth_maps.npz")
     da3_s = os.path.join(depth_dir, "da3_seg_maps.npz")

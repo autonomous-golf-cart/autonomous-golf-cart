@@ -1,35 +1,11 @@
-"""Local rendering of segmentation results. No GPU needed.
-Run after eval_segmentation.py to generate overlay, BEV, and side-by-side videos.
-Re-run this anytime you change visualization params without re-running inference.
-"""
-import numpy as np
-import cv2
-import json
+"""Bird's-eye-view projection of a segmentation map through the calibrated
+fisheye camera model, plus the camera-view color overlay."""
 import math
-import os
-import subprocess
 
-CITYSCAPES_COLORS = [
-    (128, 64, 128),   # road
-    (244, 35, 232),   # sidewalk
-    (70, 70, 70),     # building
-    (102, 102, 156),  # wall
-    (190, 153, 153),  # fence
-    (153, 153, 153),  # pole
-    (250, 170, 30),   # traffic light
-    (220, 220, 0),    # traffic sign
-    (107, 142, 35),   # vegetation
-    (152, 251, 152),  # terrain
-    (70, 130, 180),   # sky
-    (220, 20, 60),    # person
-    (255, 0, 0),      # rider
-    (0, 0, 142),      # car
-    (0, 0, 70),       # truck
-    (0, 60, 100),     # bus
-    (0, 80, 100),     # train
-    (0, 0, 230),      # motorcycle
-    (119, 11, 32),    # bicycle
-]
+import cv2
+import numpy as np
+
+from .cityscapes import CITYSCAPES_COLORS, ROAD
 
 
 def create_overlay(frame_rgb, seg_map, alpha=0.45):
@@ -173,114 +149,16 @@ def create_bev(seg_map, calib, bev_size=500, return_class_map=False):
     return bev_color
 
 
-def encode_h264(frames, path, fps=2):
-    if not frames:
-        return
-    h, w = frames[0].shape[:2]
-    tmp = path + ".tmp.mp4"
-    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-    writer = cv2.VideoWriter(tmp, fourcc, fps, (w, h))
-    for f in frames:
-        writer.write(f)
-    writer.release()
-    subprocess.run(
-        ["ffmpeg", "-y", "-i", tmp, "-c:v", "libx264",
-         "-pix_fmt", "yuv420p", "-crf", "18", path],
-        capture_output=True,
-    )
-    os.remove(tmp)
 
+def road_mask_from_bev(bev_rgb):
+    """Boolean mask of road pixels in a rendered BEV image.
 
-def make_side_by_side(overlay_path, bev_path, output_path):
-    filter_str = (
-        "[0:v]drawtext=text='Segmentation Overlay':"
-        "fontsize=22:fontcolor=white:borderw=2:bordercolor=black:"
-        "x=10:y=10[left];"
-        "[1:v]scale=480:480[bev_scaled];"
-        "[bev_scaled]drawtext=text='BEV (Top-Down)':"
-        "fontsize=22:fontcolor=white:borderw=2:bordercolor=black:"
-        "x=10:y=10[right];"
-        "[left][right]hstack=inputs=2[out]"
-    )
-    subprocess.run(
-        ["ffmpeg", "-y",
-         "-i", overlay_path, "-i", bev_path,
-         "-filter_complex", filter_str,
-         "-map", "[out]",
-         "-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", "18",
-         output_path],
-        capture_output=True,
-    )
-
-
-def main():
-    base = os.path.dirname(os.path.abspath(__file__))
-    video_path = os.path.join(base, "Caddy-Training-Data-2026-05-03_16-08-00", "front-wide.mp4")
-    calib_path = os.path.join(base, "camera_calibration.json")
-    output_dir = os.path.join(base, "eval_output")
-
-    with open(calib_path) as f:
-        calib = json.load(f)
-
-    cap = cv2.VideoCapture(video_path)
-
-    for model_name in ["segformer", "mask2former", "ddrnet"]:
-        model_dir = os.path.join(output_dir, model_name)
-        seg_path = os.path.join(model_dir, "seg_maps.npz")
-        if not os.path.exists(seg_path):
-            print(f"Skipping {model_name} - no seg_maps.npz (run eval_segmentation.py first)")
-            continue
-
-        print(f"\nRendering {model_name}...")
-        data = np.load(seg_path)
-        seg_maps = data["seg_maps"]
-        frame_indices = data["frame_indices"]
-
-        overlay_frames = []
-        bev_frames = []
-
-        for i, frame_idx in enumerate(frame_indices):
-            cap.set(cv2.CAP_PROP_POS_FRAMES, frame_idx)
-            ret, frame = cap.read()
-            if not ret:
-                continue
-
-            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            seg_map = seg_maps[i]
-
-            overlay = create_overlay(frame_rgb, seg_map)
-            overlay_frames.append(cv2.cvtColor(overlay, cv2.COLOR_RGB2BGR))
-
-            bev = create_bev(seg_map, calib)
-            bev_frames.append(cv2.cvtColor(bev, cv2.COLOR_RGB2BGR))
-
-            if (i + 1) % 50 == 0:
-                print(f"  Rendered {i + 1}/{len(frame_indices)} frames")
-
-        # Save videos
-        overlay_path = os.path.join(model_dir, "overlay.mp4")
-        bev_path = os.path.join(model_dir, "bev.mp4")
-        sbs_path = os.path.join(model_dir, "side_by_side.mp4")
-
-        print(f"  Encoding videos...")
-        encode_h264(overlay_frames, overlay_path)
-        encode_h264(bev_frames, bev_path)
-        make_side_by_side(overlay_path, bev_path, sbs_path)
-
-        # Save sample JPGs
-        sample_indices = [0, len(overlay_frames)//4, len(overlay_frames)//2, 3*len(overlay_frames)//4]
-        for j, si in enumerate(sample_indices):
-            if si < len(overlay_frames):
-                cv2.imwrite(os.path.join(model_dir, f"sample_{j}_overlay.jpg"),
-                           overlay_frames[si], [cv2.IMWRITE_JPEG_QUALITY, 90])
-                cv2.imwrite(os.path.join(model_dir, f"sample_{j}_bev.jpg"),
-                           bev_frames[si], [cv2.IMWRITE_JPEG_QUALITY, 90])
-
-        print(f"  {model_name}: saved overlay.mp4, bev.mp4, side_by_side.mp4 + {len(sample_indices)} sample pairs")
-
-    cap.release()
-    print(f"\nDone! All outputs in {output_dir}/")
-
-
-if __name__ == "__main__":
-    main()
+    Grid lines brighten road pixels by +35 (and +70 where two lines cross), so
+    those shades count as road too.
+    """
+    road = np.array(CITYSCAPES_COLORS[ROAD], dtype=np.int16)
+    mask = np.zeros(bev_rgb.shape[:2], dtype=bool)
+    for boost in (0, 35, 70):
+        color = np.clip(road + boost, 0, 255).astype(np.uint8)
+        mask |= np.all(bev_rgb == color, axis=-1)
+    return mask

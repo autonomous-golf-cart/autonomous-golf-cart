@@ -1,5 +1,9 @@
-"""Run render_trajectories on Modal for fast CPU rendering."""
+"""Run tools/render_trajectories.py on Modal for fast CPU rendering.
+
+    modal run cloud/render_trajectories.py
+"""
 import modal
+import sys
 import os
 import json
 
@@ -31,9 +35,7 @@ def run_render(
     gps_json: str,
     control_jsonl: str,
     map_route_json: str,
-    src_render_py: str,
-    src_path_planning_py: str,
-    src_render_trajectories_py: str,
+    segdrive_src: dict,
 ):
     import numpy as np
     import cv2
@@ -67,37 +69,32 @@ def run_render(
 
     import sys
 
-    # Write source files from string args
-    with open(os.path.join(tmpdir, "render.py"), "w") as f:
-        f.write(src_render_py)
-    with open(os.path.join(tmpdir, "path_planning.py"), "w") as f:
-        f.write(src_path_planning_py)
-    with open(os.path.join(tmpdir, "render_trajectories.py"), "w") as f:
-        f.write(src_render_trajectories_py)
+    # Recreate the segdrive package from the shipped sources
+    pkg_dir = os.path.join(tmpdir, "segdrive")
+    os.makedirs(pkg_dir)
+    for name, src in segdrive_src.items():
+        with open(os.path.join(pkg_dir, name), "w") as f:
+            f.write(src)
 
     sys.path.insert(0, tmpdir)
     os.chdir(tmpdir)
 
-    from render_trajectories import (
-        SteeringEstimator, load_control_data, get_gt_steering_at_time,
-        lookahead_point, draw_trajectory, draw_map_route, draw_gps_position,
-        draw_steering_wheel, GOLF_CART_L, STEERING_RATIO, FT_TO_M,
+    from segdrive import draw
+    from segdrive.bev import create_bev, create_overlay, road_mask_from_bev
+    from segdrive.draw import (
+        lookahead_point, draw_trajectory, draw_map_route, draw_gps_position, draw_steering_wheel,
     )
-    from render import create_bev, create_overlay, encode_h264, CITYSCAPES_COLORS
-    from path_planning import (
+    from segdrive.planning import (
         load_gps_route, get_ego_from_gps,
         lane_aware_centerline_path, map_route_to_bev,
-        load_map_route, localize_on_map_route, get_map_route_ahead,
+        load_map_route, localize_on_map_route,
     )
-    import render_trajectories as rt
+    from segdrive.steering import SteeringEstimator, load_control_data, get_gt_steering_at_time
+    from segdrive.video import encode_h264
 
     calib = json.loads(calib_json)
-    bev_range = calib.get("bev_range", {})
-    rt.RANGE_FWD = bev_range.get("forward_ft", 50) * FT_TO_M
-    rt.RANGE_SIDE = bev_range.get("side_ft", 25) * FT_TO_M
-    RANGE_FWD = rt.RANGE_FWD
-    RANGE_SIDE = rt.RANGE_SIDE
-    BEV_SIZE = rt.BEV_SIZE
+    RANGE_FWD, RANGE_SIDE = draw.set_bev_range(calib)
+    BEV_SIZE = draw.BEV_SIZE
 
     gps_route, ref_lat, ref_lon = load_gps_route(os.path.join(data_dir, "gps.json"))
     map_route = load_map_route(os.path.join(data_dir, "map_route.json"), ref_lat, ref_lon)
@@ -122,9 +119,6 @@ def run_render(
     max_time = frame_indices[-1] / fps_video if total > 0 else 0
     print(f"Rendering {total} frames ({max_time:.0f}s)...")
 
-    road_color = np.array(CITYSCAPES_COLORS[0], dtype=np.uint8)
-    grid_color = np.clip(np.array(CITYSCAPES_COLORS[0], dtype=np.int16) + 35, 0, 255).astype(np.uint8)
-    grid2_color = np.clip(np.array(CITYSCAPES_COLORS[0], dtype=np.int16) + 70, 0, 255).astype(np.uint8)
     road_width_ft = calib.get("road_width_ft", 20.0)
 
     t_start = time.time()
@@ -136,9 +130,7 @@ def run_render(
         map_idx, map_dist = localize_on_map_route(map_route, ego_x, ego_y)
 
         bev_base = create_bev(seg_map, calib, BEV_SIZE)
-        road_mask = (np.all(bev_base == road_color, axis=-1) |
-                     np.all(bev_base == grid_color, axis=-1) |
-                     np.all(bev_base == grid2_color, axis=-1))
+        road_mask = road_mask_from_bev(bev_base)
         mr_bx, mr_by = map_route_to_bev(map_route, ego_x, ego_y, ego_yaw, BEV_SIZE, RANGE_FWD, RANGE_SIDE)
 
         lane_traj, lane_local = lane_aware_centerline_path(
@@ -277,15 +269,18 @@ def run_render(
 def main():
     import numpy as np
 
-    base = os.path.dirname(os.path.abspath(__file__))
-    data_dir = os.path.join(base, "Caddy-Training-Data-2026-05-03_16-08-00")
-    output_dir = os.path.join(base, "eval_output", "trajectories")
+    seg_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    sys.path.insert(0, seg_root)
+    from segdrive.paths import CALIB_PATH, DATA_DIR, EVAL_DIR
+
+    data_dir = str(DATA_DIR)
+    output_dir = str(EVAL_DIR / "trajectories")
     os.makedirs(output_dir, exist_ok=True)
 
     print("Reading input files...")
     with open(os.path.join(data_dir, "front-wide.mp4"), "rb") as f:
         video_bytes = f.read()
-    with open(os.path.join(base, "camera_calibration.json")) as f:
+    with open(CALIB_PATH) as f:
         calib_json = f.read()
     with open(os.path.join(data_dir, "gps.json")) as f:
         gps_json = f.read()
@@ -293,14 +288,16 @@ def main():
         control_jsonl = f.read()
     with open(os.path.join(data_dir, "map_route.json")) as f:
         map_route_json = f.read()
-    with open(os.path.join(base, "eval_output", "segformer", "seg_maps.npz"), "rb") as f:
+    with open(EVAL_DIR / "segformer" / "seg_maps.npz", "rb") as f:
         seg_npz_bytes = f.read()
 
-    # Read source files
-    src_files = {}
-    for src in ["render.py", "path_planning.py", "render_trajectories.py"]:
-        with open(os.path.join(base, src)) as f:
-            src_files[src] = f.read()
+    # Ship the segdrive package source so the container runs the same code
+    pkg_dir = os.path.join(seg_root, "segdrive")
+    segdrive_src = {}
+    for name in sorted(os.listdir(pkg_dir)):
+        if name.endswith(".py"):
+            with open(os.path.join(pkg_dir, name)) as f:
+                segdrive_src[name] = f.read()
 
     total_upload = (len(video_bytes) + len(seg_npz_bytes)) / 1e6
     print(f"Total upload: {total_upload:.0f} MB")
@@ -313,9 +310,7 @@ def main():
         gps_json=gps_json,
         control_jsonl=control_jsonl,
         map_route_json=map_route_json,
-        src_render_py=src_files["render.py"],
-        src_path_planning_py=src_files["path_planning.py"],
-        src_render_trajectories_py=src_files["render_trajectories.py"],
+        segdrive_src=segdrive_src,
     )
 
     print(f"\nRender complete: {result['num_frames']} frames in {result['render_time_s']}s")

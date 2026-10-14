@@ -1,5 +1,6 @@
 """Run Depth Anything V3 + Mask2Former on Modal A100. Uses DA3-LARGE-1.1 for metric depth."""
 import modal
+import sys
 import os
 import json
 import zlib
@@ -178,9 +179,11 @@ def _process_da3_seg_batch(batch_bgr, batch_paths, da3, seg_processor, seg_model
 def main():
     import numpy as np
 
-    base = os.path.dirname(os.path.abspath(__file__))
-    data_dir = os.path.join(base, "Caddy-Training-Data-2026-05-03_16-08-00")
-    output_dir = os.path.join(base, "depth_output")
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    from segdrive.paths import DATA_DIR, DEPTH_DIR
+
+    data_dir = str(DATA_DIR)
+    output_dir = str(DEPTH_DIR)
 
     videos = {
         "front-wide": os.path.join(data_dir, "front-wide.mp4"),
@@ -228,4 +231,4 @@ def main():
         print(f"  Seg maps: {vid_dir}/da3_seg_maps.npz")
 
     print(f"\nAll DA3 data saved to {output_dir}/")
-    print("Run render on Modal: modal run render_modal_depth.py --da3")
+    print("Run render on Modal: modal run cloud/render_depth.py --da3")

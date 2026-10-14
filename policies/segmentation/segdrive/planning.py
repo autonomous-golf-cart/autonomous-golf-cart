@@ -216,7 +216,8 @@ def gps_to_bev(gps_route, ego_x, ego_y, ego_yaw, bev_size, range_fwd, range_side
 
 def get_driveable_mask(seg_map, calib, bev_size=500):
     """Project segmentation to BEV and return boolean mask of driveable area."""
-    from render import create_bev, CITYSCAPES_COLORS
+    from .bev import create_bev
+    from .cityscapes import CITYSCAPES_COLORS
     bev_img = create_bev(seg_map, calib, bev_size)
     road_color = np.array(CITYSCAPES_COLORS[0])
     sidewalk_color = np.array(CITYSCAPES_COLORS[1])

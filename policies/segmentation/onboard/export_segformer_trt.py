@@ -5,8 +5,8 @@ TensorRT engine for it.
 Default target: SegFormer-b5 cityscapes at 1024x1024, fp16 engine.
 
 Usage:
-    python scripts/export_segformer_trt.py
-    python scripts/export_segformer_trt.py --variant b2 --size 1024
+    python onboard/export_segformer_trt.py
+    python onboard/export_segformer_trt.py --variant b2 --size 1024
 """
 from __future__ import annotations
 
