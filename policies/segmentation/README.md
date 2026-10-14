@@ -99,9 +99,9 @@ Run everything from this directory.
 ```bash
 pip install -r requirements.txt
 
-# live steering on a video or webcam
-python live.py --source path/to/drive.mp4
-python live.py --source 0 --model b2
+# live steering: recorded drive if present, else camera 0
+python live.py
+python live.py --source path/to/drive.mp4 --model b2   # other video, heavier model
 ```
 
 ### Working with a recorded drive

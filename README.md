@@ -132,7 +132,7 @@ export NTRIP_RTKDATA_USER=...  NTRIP_RTKDATA_PASS=...
 
 ```bash
 pip install -r policies/segmentation/requirements.txt
-python policies/segmentation/live.py --source 0 --model b2
+python policies/segmentation/live.py
 ```
 
 ## Drive the real cart from Python

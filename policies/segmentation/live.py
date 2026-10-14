@@ -1,7 +1,7 @@
 """Live steering prediction from video or camera.
 
 Usage:
-  python live.py                           # replay training video
+  python live.py                           # recorded drive if present, else camera 0
   python live.py --source 0               # webcam
   python live.py --source path/to/vid.mp4  # custom video
   python live.py --model b2               # use SegFormer-B2 (heavier, better)
@@ -57,7 +57,7 @@ def build_display(overlay_bgr, bev_frame_rgb, steer_deg, fps, lane_ms, seg_ms):
 def main():
     parser = argparse.ArgumentParser(description="Live steering prediction")
     parser.add_argument("--source", default=None,
-                        help="Video path, camera index, or omit for training video")
+                        help="Video path or camera index (default: recorded drive if present, else camera 0)")
     parser.add_argument("--model", default="b0", choices=MODEL_VARIANTS.keys(),
                         help="SegFormer variant (default: b0)")
     parser.add_argument("--device", default=None,
@@ -74,7 +74,8 @@ def main():
 
     # Determine video source
     if args.source is None:
-        src = str(DATA_DIR / "front-wide.mp4")
+        drive_video = DATA_DIR / "front-wide.mp4"
+        src = str(drive_video) if drive_video.exists() else 0
     elif args.source.isdigit():
         src = int(args.source)
     else:
