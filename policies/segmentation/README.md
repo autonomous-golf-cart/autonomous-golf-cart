@@ -63,6 +63,7 @@ segmentation/
 | File | What it does |
 |------|--------------|
 | `segmentation_infer.py` | Live planner sidecar: reads the cameras, publishes `steer_deg` + gas/brake targets. |
+| `drive.py` | Reads the sidecar's targets at 50 Hz and drives the cart through `cartlib`. Dry run unless `--i-understand-this-drives`. |
 | `seg_fast.py` | Precomputed BEV remap and a cv2-accelerated planner, about 10× faster than `segdrive`. |
 | `export_segformer_trt.py` | Export SegFormer to ONNX and build a TensorRT engine into `models/`. |
 | `seg_depth_pointcloud.py` | Segmented RealSense/depth point cloud with a live viewer. |
@@ -123,10 +124,17 @@ python live.py                             # with no --source, replays the drive
 # build a TensorRT engine for SegFormer
 python onboard/export_segformer_trt.py
 
-# live planner sidecar: reads the cameras, writes frames to /tmp/cart_frames/ and steer + pedal targets to /tmp/autoware_state.json
+# 1. planner sidecar: reads the cameras, writes frames to /tmp/cart_frames/
+#    and steer + pedal targets to /tmp/autoware_state.json
 python onboard/segmentation_infer.py
+
+# 2. in a second terminal, with the wheels straight: preview, then drive
+python onboard/drive.py
+python onboard/drive.py --i-understand-this-drives
 ```
 
-The sidecar publishes `steer_deg` and `target_gas` / `target_brake` to a JSON
-state file that the drive loop consumes. Actuation goes through
-[`cart-api`](../../cart-api).
+`drive.py` sends the sidecar's targets to the cart through
+[`cart-api`](../../cart-api). Gas is capped at `FSD_GAS_LIMIT` (`--max-gas` to
+change). If the sidecar stops publishing, `drive.py` releases the gas
+immediately and brakes after 1 s. Ctrl-C brakes, then disarms. There is no
+software takeover, so keep a hand on the hardware e-stop.
