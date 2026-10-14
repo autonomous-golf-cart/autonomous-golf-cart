@@ -104,7 +104,7 @@ Deeper notes live in [`docs/architecture.md`](docs/architecture.md).
 ## Quick start
 
 ```bash
-git clone https://github.com/ethandgoodhart/autonomous-golf-cart.git
+git clone https://github.com/autonomous-golf-cart/autonomous-golf-cart.git
 cd autonomous-golf-cart
 
 # 1. Install the cart API
