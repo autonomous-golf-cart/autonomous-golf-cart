@@ -167,7 +167,7 @@ Full reference: [`cart-api/README.md`](cart-api/README.md).
 ## Hardware
 
 <div align="center">
-<img src="docs/assets/hardware-coming-soon.svg" width="720" alt="Blueprint placeholder: hardware design renders coming soon">
+<a href="hardware/renders/catalog.png"><img src="hardware/renders/catalog.png" width="1400" alt="Landscape catalog of all 33 mechanical components, with CAD renders and dimensions"></a>
 </div>
 
 | Subsystem | Hardware | Interface |
@@ -179,8 +179,10 @@ Full reference: [`cart-api/README.md`](cart-api/README.md).
 | Vision | 4× USB cameras incl. 170° fisheye front camera | UVC |
 | Safety | Hardware e-stop + firmware heartbeat watchdog | — |
 
-CAD, wiring diagrams, and board files go in [`hardware/`](hardware). Subsystem
-write-ups are in [`docs/`](docs): [steering](docs/steering.md) ·
+The cart includes **33 mechanical 3D-printed components**. Browse their CAD
+exports, per-component renders, and installation descriptions in the
+[hardware catalog](hardware/README.md). Subsystem write-ups
+are in [`docs/`](docs): [steering](docs/steering.md) ·
 [pedal actuators](docs/linear_actuators.md) · [e-stop](docs/estop.md) ·
 [GPS](docs/gps.md) · [cameras](docs/cameras.md).
 
