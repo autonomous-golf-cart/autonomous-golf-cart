@@ -17,7 +17,7 @@ The installation descriptions above incorporate the builder's identification of 
 
 ## Files and previews
 
-The original filenames and file contents are preserved. Each preview links to its STL; the [landscape component catalog](renders/catalog.png) shows all 33 exports at once and is embedded in the main README. The catalog uses CMU Serif headings with Geist and Geist Mono for small labels, a white background, warm charcoal text, muted olive details, and thin neutral borders. The old front camera holder is retained as a separate revision.
+The original filenames and file contents are preserved. Each preview links to its STL; the [landscape component catalog](renders/catalog.png) shows all 33 exports at once and is embedded in the main README. The catalog uses Geist throughout, with Geist Mono for labels, component numbers, and dimensions. It has a white background, warm charcoal text, muted olive details, thin neutral borders, and subtly rounded outer corners. The old front camera holder is retained as a separate revision.
 
 These are **STL mesh exports**, rather than editable Fusion/STEP projects. STL does not encode units: the dimensions below are axis-aligned bounding boxes in the original export axes, **assuming millimeters**. Renders are individually fitted to the frame and are not shown at a common scale. Some exports contain several separate pieces, such as an enclosure and its lid.
 
@@ -137,4 +137,4 @@ python3 hardware/tools/render_cad.py --only pedal-case-brake-u
 python3 hardware/tools/render_cad.py --sheets-only
 ```
 
-The component IDs and metadata live in [`cad/catalog.json`](cad/catalog.json). [CMU Serif](tools/fonts/cmu/) and [Geist](tools/fonts/geist/) font files and their licenses are bundled, so the images regenerate with the same typography on any machine. The render script does not modify the source STLs.
+The component IDs and metadata live in [`cad/catalog.json`](cad/catalog.json). [Geist and Geist Mono](tools/fonts/geist/) font files and their license are bundled, so the images regenerate with the same typography on any machine. The render script does not modify the source STLs.

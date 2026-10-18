@@ -120,13 +120,11 @@ def render(vertices, destination, width=1200, height=900):
     return result
 
 
-def font(size, face="roman"):
+def font(size, face="ui"):
     # Bundle the real typefaces so regenerated images keep the same typography.
-    fonts = HARDWARE / "tools/fonts"
-    if face in {"ui", "mono"}:
-        path = fonts / "geist" / ("Geist-Regular.ttf" if face == "ui" else "GeistMono-Regular.ttf")
-    else:
-        path = fonts / "cmu" / f"cmu-serif-{face}.ttf"
+    fonts = HARDWARE / "tools/fonts/geist"
+    names = {"ui": "Geist-Regular.ttf", "bold": "Geist-Bold.ttf", "mono": "GeistMono-Regular.ttf"}
+    path = fonts / names[face]
     return ImageFont.truetype(str(path), size)
 
 
@@ -152,26 +150,20 @@ def wrap_text(draw, text, face, width):
 
 def make_sheet(parts, destination, columns, title, subtitle, cell_width=480):
     card_height = 364
-    margin, gutter, header, footer = 84, 20, 340, 92
+    margin, gutter, header, footer = 84, 20, 240, 92
     rows = math.ceil(len(parts) / columns)
     width = 2 * margin + columns * cell_width + (columns - 1) * gutter
     height = header + rows * card_height + (rows - 1) * gutter + footer
     sheet = Image.new("RGB", (width, height), PALETTE["background"])
     draw = ImageDraw.Draw(sheet)
     ink, muted, rule = PALETTE["foreground"], PALETTE["muted"], PALETTE["border"]
-    draw.rectangle((margin, 47, margin + 10, 57), fill=ink)
-    draw.text((margin + 26, 34), "Autonomous golf cart", fill=ink, font=font(28))
-    nav = "HARDWARE / MECHANICAL DESIGN"
-    nav_width = sum(draw.textlength(c, font=font(14, "mono")) + 1.3 for c in nav)
-    tracked_text(draw, (width - margin - nav_width, 43), nav)
-    draw.line((margin, 91, width - margin, 91), fill=rule, width=2)
-    draw.text((margin, 134), title, fill=ink, font=font(74, "bold"))
-    draw.text((margin + 3, 236), subtitle, fill=muted, font=font(27, "italic"))
-    draw.line((width - margin - 290, 145, width - margin - 290, 278), fill=rule, width=2)
-    tracked_text(draw, (width - margin - 258, 153), "COMPONENTS")
-    draw.text((width - margin - 258, 182), "33", fill=ink, font=font(65, "bold"))
-    draw.text((width - margin - 166, 220), "/ 5 subsystems", fill=muted, font=font(20, "ui"))
-    draw.line((margin, 304, width - margin, 304), fill=rule, width=2)
+    draw.text((margin, 50), title, fill=ink, font=font(68, "bold"))
+    draw.text((margin + 3, 151), subtitle, fill=muted, font=font(25))
+    draw.line((width - margin - 300, 58, width - margin - 300, 178), fill=rule, width=2)
+    tracked_text(draw, (width - margin - 268, 64), "COMPONENTS")
+    draw.text((width - margin - 268, 94), "33", fill=ink, font=font(61, "mono"))
+    draw.text((width - margin - 176, 131), "/ 5 subsystems", fill=muted, font=font(18, "mono"))
+    draw.line((margin, 204, width - margin, 204), fill=rule, width=2)
     for i, part in enumerate(parts):
         x = margin + (i % columns) * (cell_width + gutter)
         y = header + (i // columns) * (card_height + gutter)
@@ -181,7 +173,7 @@ def make_sheet(parts, destination, columns, title, subtitle, cell_width=480):
         tracked_text(draw, (x + 20, y + 12), GROUP_NAMES[part["group"]].upper(), spacing=0.8)
         number = f"{i + 1:02d}"
         draw.text((x + cell_width - 48, y + 9), number, fill=muted, font=font(18, "mono"))
-        title_font = font(29, "bold")
+        title_font = font(25, "bold")
         lines = wrap_text(draw, part["name"], title_font, cell_width - 40)
         if len(lines) > 2:
             raise ValueError(f'Component title does not fit: {part["name"]}')
@@ -196,13 +188,23 @@ def make_sheet(parts, destination, columns, title, subtitle, cell_width=480):
                              y + 119 + (194 - preview.height) // 2))
         draw.line((x, y + 328, x + cell_width, y + 328), fill=rule, width=1)
         dimensions = " × ".join(f"{d:.1f}".removesuffix(".0") for d in part["dimensions"])
-        draw.text((x + 20, y + 338), dimensions + " mm*", fill=muted, font=font(18, "ui"))
+        draw.text((x + 20, y + 338), dimensions + " mm*", fill=muted, font=font(17, "mono"))
         draw.text((x + cell_width - 56, y + 340), "STL", fill=muted, font=font(14, "mono"))
     bottom = height - footer + 30
     draw.line((margin, bottom, width - margin, bottom), fill=rule, width=2)
     draw.text((margin, bottom + 20), "Original mesh geometry · *STL dimensions interpreted in millimeters.", fill=muted, font=font(18, "ui"))
     note = "Individual views are not to a common scale."
     draw.text((width - margin - draw.textlength(note, font=font(18, "ui")), bottom + 20), note, fill=muted, font=font(18, "ui"))
+    # A small radius at native resolution stays subtle in the README embed.
+    radius, supersample = 24, 2
+    draw.rounded_rectangle((1, 1, width - 2, height - 2), radius=radius,
+                           outline=rule, width=2)
+    mask = Image.new("L", (width * supersample, height * supersample), 0)
+    ImageDraw.Draw(mask).rounded_rectangle(
+        (0, 0, width * supersample - 1, height * supersample - 1),
+        radius=radius * supersample, fill=255)
+    sheet = sheet.convert("RGBA")
+    sheet.putalpha(mask.resize((width, height), Image.Resampling.LANCZOS))
     sheet.save(destination, optimize=True)
 
 
