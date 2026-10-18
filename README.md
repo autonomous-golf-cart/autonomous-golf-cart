@@ -201,5 +201,5 @@ Issues and pull requests are welcome.
 
 ## License
 
-The hardware and software of this project are fully open source, released under the [MIT License](LICENSE).
+The hardware and software of this project are fully open source, released under the [MIT License](LICENSE). 
 
