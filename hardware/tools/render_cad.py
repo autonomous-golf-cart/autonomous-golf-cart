@@ -123,7 +123,7 @@ def render(vertices, destination, width=1200, height=900):
 def font(size, face="ui"):
     # Bundle the real typefaces so regenerated images keep the same typography.
     fonts = HARDWARE / "tools/fonts/geist"
-    names = {"ui": "Geist-Regular.ttf", "bold": "Geist-Bold.ttf", "mono": "GeistMono-Regular.ttf"}
+    names = {"ui": "Geist-Regular.ttf", "mono": "GeistMono-Regular.ttf"}
     path = fonts / names[face]
     return ImageFont.truetype(str(path), size)
 
@@ -157,12 +157,8 @@ def make_sheet(parts, destination, columns, title, subtitle, cell_width=480):
     sheet = Image.new("RGB", (width, height), PALETTE["background"])
     draw = ImageDraw.Draw(sheet)
     ink, muted, rule = PALETTE["foreground"], PALETTE["muted"], PALETTE["border"]
-    draw.text((margin, 50), title, fill=ink, font=font(68, "bold"))
+    draw.text((margin, 50), title, fill=ink, font=font(62))
     draw.text((margin + 3, 151), subtitle, fill=muted, font=font(25))
-    draw.line((width - margin - 300, 58, width - margin - 300, 178), fill=rule, width=2)
-    tracked_text(draw, (width - margin - 268, 64), "COMPONENTS")
-    draw.text((width - margin - 268, 94), "33", fill=ink, font=font(61, "mono"))
-    draw.text((width - margin - 176, 131), "/ 5 subsystems", fill=muted, font=font(18, "mono"))
     draw.line((margin, 204, width - margin, 204), fill=rule, width=2)
     for i, part in enumerate(parts):
         x = margin + (i % columns) * (cell_width + gutter)
@@ -173,7 +169,7 @@ def make_sheet(parts, destination, columns, title, subtitle, cell_width=480):
         tracked_text(draw, (x + 20, y + 12), GROUP_NAMES[part["group"]].upper(), spacing=0.8)
         number = f"{i + 1:02d}"
         draw.text((x + cell_width - 48, y + 9), number, fill=muted, font=font(18, "mono"))
-        title_font = font(25, "bold")
+        title_font = font(25)
         lines = wrap_text(draw, part["name"], title_font, cell_width - 40)
         if len(lines) > 2:
             raise ValueError(f'Component title does not fit: {part["name"]}')

@@ -2,7 +2,11 @@
 
 The cart's custom mounts, enclosures, pedal mechanisms, and steering hardware, with **33 original STL exports** and a shaded CAD render of every component.
 
-[![Selected cart hardware renders](renders/overview.png)](renders/catalog.png)
+![Installed cart hardware and steering-wheel assembly](photos/cart-hardware.png)
+
+Installed hardware (left) and steering-wheel assembly (right). The annotated photo shows the six-camera configuration, with three cameras facing forward and three facing rearward.
+
+[![Full landscape component catalog](renders/catalog.png)](renders/catalog.png)
 
 [Pedal actuation](#pedal-actuation) · [Steering](#steering-and-belt-drive) · [Cameras](#camera-rig) · [Sensors](#sensor-housings) · [Display and connectivity](#display-and-connectivity)
 
@@ -17,7 +21,7 @@ The installation descriptions above incorporate the builder's identification of 
 
 ## Files and previews
 
-The original filenames and file contents are preserved. Each preview links to its STL; the [landscape component catalog](renders/catalog.png) shows all 33 exports at once and is embedded in the main README. The catalog uses Geist throughout, with Geist Mono for labels, component numbers, and dimensions. It has a white background, warm charcoal text, muted olive details, thin neutral borders, and subtly rounded outer corners. The old front camera holder is retained as a separate revision.
+The original filenames and file contents are preserved. Each preview links to its STL; the [landscape component catalog](renders/catalog.png) shows all 33 exports at once and is embedded in both READMEs. The catalog uses Geist Regular for headings, component names, and notes, with Geist Mono Regular for labels, component numbers, and dimensions. It has a white background, warm charcoal text, muted olive details, thin neutral borders, and subtly rounded outer corners. The old front camera holder is retained as a separate revision.
 
 These are **STL mesh exports**, rather than editable Fusion/STEP projects. STL does not encode units: the dimensions below are axis-aligned bounding boxes in the original export axes, **assuming millimeters**. Renders are individually fitted to the frame and are not shown at a common scale. Some exports contain several separate pieces, such as an enclosure and its lid.
 
@@ -97,7 +101,7 @@ Mounts for the operator display and Starlink equipment.
 | Steering | ODrive S1 + M8325s motor, 3:1 HTD 5M belt drive |
 | Pedals | 2 linear actuators with potentiometer feedback, 2 BTS7960 H-bridges, Arduino Mega 2560 |
 | GNSS | u-blox ZED-F9x RTK receiver with NTRIP corrections |
-| Cameras | USB camera rig, including a 170° fisheye front camera |
+| Cameras | USB camera rig; the annotated photo shows six cameras, three front and three rear |
 | Safety | Hardware e-stop and firmware heartbeat watchdog |
 | Power | 48 V cart pack with dedicated 12 V and 5 V buck rails |
 
@@ -114,6 +118,7 @@ Subsystem documentation: [steering](../docs/steering.md) · [pedal actuators](..
 | [`mechanical/accessories/`](mechanical/accessories/) | Monitor and Starlink mounts. |
 | [`cad/catalog.json`](cad/catalog.json) | Component descriptions, paths, mesh dimensions, triangle counts, and original-file SHA-256 checksums. |
 | [`renders/`](renders/) | One PNG per export, selected-parts overview, and full catalog. |
+| [`photos/`](photos/) | Annotated photo of the installed cart hardware and steering assembly. |
 | [`tools/`](tools/) | Reproducible geometry renderer. |
 | [`arduino-sketches/`](arduino-sketches/) | Pedal control, watchdog, sensor-validation firmware, and upload tooling. See its [README](arduino-sketches/README.md). |
 | [`sensors/calibration/`](sensors/calibration/) | Camera intrinsics/extrinsics and calibration boards. |

@@ -166,8 +166,20 @@ Full reference: [`cart-api/README.md`](cart-api/README.md).
 
 ## Hardware
 
+The cart is a Club Car Precedent retrofitted with drive-by-wire steering and
+pedals. An ODrive S1 controls an M8325s motor through a 3:1 HTD 5M belt drive;
+a printed chestplate fits over the steering wheel to turn it. Two 12 V linear
+actuators press the gas and brake, driven by BTS7960 H-bridges and an Arduino
+Mega with potentiometer feedback. A gripper anchors the wooden actuator frame
+to the steering column so it cannot lift when the pedals are pressed.
+
+An onboard Jetson AGX Thor connects to the cameras, IMU, and GNSS receiver.
+The pictured build carries six cameras, three front and three rear, plus a
+roof-mounted Starlink Mini for connectivity.
+
 <div align="center">
-<a href="hardware/renders/catalog.png"><img src="hardware/renders/catalog.png" width="1400" alt="Landscape catalog of all 33 mechanical components, with CAD renders and dimensions"></a>
+<img src="hardware/photos/cart-hardware.png" width="1200" alt="Annotated cart hardware photo showing the camera rig, Starlink Mini, onboard electronics, pedal actuators, and steering-wheel assembly">
+<br><sub>Installed hardware (left) and steering-wheel assembly (right).</sub>
 </div>
 
 | Subsystem | Hardware | Interface |
@@ -176,11 +188,17 @@ Full reference: [`cart-api/README.md`](cart-api/README.md).
 | Steering | ODrive S1 + M8325s, 3:1 HTD 5M belt | USB · ODrive ASCII |
 | Gas + brake | 2× linear actuators, BTS7960 drivers, Arduino Mega 2560 | USB serial |
 | Localization | u-blox ZED-F9x RTK GNSS + NTRIP corrections | NMEA / RTCM |
-| Vision | 4× USB cameras incl. 170° fisheye front camera | UVC |
+| Vision | Camera rig; six cameras in the pictured build | USB |
 | Safety | Hardware e-stop + firmware heartbeat watchdog | — |
 
-The cart includes **33 mechanical 3D-printed components**. Browse their CAD
-exports, per-component renders, and installation descriptions in the
+The cart includes **33 mechanical 3D-printed components** for steering, pedal
+actuation, camera mounting, sensor housings, and accessories.
+
+<div align="center">
+<a href="hardware/renders/catalog.png"><img src="hardware/renders/catalog.png" width="1400" alt="Landscape catalog of all 33 mechanical components, with CAD renders and dimensions"></a>
+</div>
+
+Browse the CAD exports, per-component renders, and installation descriptions in the
 [hardware catalog](hardware/README.md). Subsystem write-ups
 are in [`docs/`](docs): [steering](docs/steering.md) ·
 [pedal actuators](docs/linear_actuators.md) · [e-stop](docs/estop.md) ·
