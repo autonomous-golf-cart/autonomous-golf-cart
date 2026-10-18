@@ -1,0 +1,501 @@
+{
+  "format": "STL",
+  "unit_note": "STL is unitless; bounding-box dimensions are reported assuming millimeters. Confirm export scale before fabrication.",
+  "parts": [
+    {
+      "id": "pedal-case-brake-u",
+      "name": "Brake pedal actuator case",
+      "group": "pedals",
+      "file": "mechanical/pedals/Pedal Case (BRAKE) U.stl",
+      "render": "renders/pedal-case-brake-u.png",
+      "role": "Brake pedal assembly: case for the actuator mechanism.",
+      "triangles": 792,
+      "dimensions": [
+        202.5,
+        112.5,
+        51.5
+      ],
+      "sha256": "5022db554ad7520cdb674d3fdb8d437429c854d7f2846e9d1053ce9fc1feb49d"
+    },
+    {
+      "id": "pedal-cover-brake-u",
+      "name": "Brake pedal actuator cover",
+      "group": "pedals",
+      "file": "mechanical/pedals/Pedal Cover (BRAKE) U.stl",
+      "render": "renders/pedal-cover-brake-u.png",
+      "role": "Brake pedal assembly: cover matching the brake case.",
+      "triangles": 1820,
+      "dimensions": [
+        202.5,
+        87.5,
+        23.0
+      ],
+      "sha256": "d8cec8d59910fa5e86fa1a1ffd2526b72b97d9ef248b6e65f84cfbccaba16a0d"
+    },
+    {
+      "id": "pedal-case-gas-u",
+      "name": "Gas pedal actuator case",
+      "group": "pedals",
+      "file": "mechanical/pedals/Pedal Case (GAS) U.stl",
+      "render": "renders/pedal-case-gas-u.png",
+      "role": "Accelerator pedal assembly: case for the actuator mechanism.",
+      "triangles": 1696,
+      "dimensions": [
+        202.5,
+        112.5,
+        64.5
+      ],
+      "sha256": "b33c6eaa19bbda9dfb387a46305fd0d012b915606e981e95524e9956ac2ffb36"
+    },
+    {
+      "id": "pedal-cover-gas-u",
+      "name": "Gas pedal actuator cover",
+      "group": "pedals",
+      "file": "mechanical/pedals/Pedal Cover (GAS) U.stl",
+      "render": "renders/pedal-cover-gas-u.png",
+      "role": "Accelerator pedal assembly: cover matching the gas case.",
+      "triangles": 636,
+      "dimensions": [
+        202.5,
+        87.5,
+        12.0
+      ],
+      "sha256": "5a2bba69b454dbbaac36b9b0c7da32710840e3406e2f51d218266e0461f326c3"
+    },
+    {
+      "id": "piston-arm",
+      "name": "Piston arm",
+      "group": "pedals",
+      "file": "mechanical/pedals/Piston Arm.stl",
+      "render": "renders/piston-arm.png",
+      "role": "Pedal actuation linkage; also visible as a component in the supplied brake-assembly reference.",
+      "triangles": 552,
+      "dimensions": [
+        245.63,
+        51.5,
+        65.0
+      ],
+      "sha256": "024893795326fab015ce6aa387ddc8f6c17b458aca8e99f388f4f57b6f636c37"
+    },
+    {
+      "id": "column-stand",
+      "name": "Column stand",
+      "group": "pedals",
+      "file": "mechanical/pedals/Column Stand.stl",
+      "render": "renders/column-stand.png",
+      "role": "Pedal-frame retention: the stand to which the gripper attaches, linking the wooden actuator-support structure to the clamp on the steering column.",
+      "triangles": 3380,
+      "dimensions": [
+        109.0,
+        120.0,
+        82.5
+      ],
+      "sha256": "2aff19da2bf156f99db40676e451e71e44c8de2780542b2f16592d0adba40f45"
+    },
+    {
+      "id": "gripper",
+      "name": "Gripper",
+      "group": "pedals",
+      "file": "mechanical/pedals/Gripper.stl",
+      "render": "renders/gripper.png",
+      "role": "Pedal-frame retention: connected to the column stand and clamped around the steering column to keep the wooden actuator frame from lifting as the actuators press the gas or brake.",
+      "triangles": 3888,
+      "dimensions": [
+        72.396,
+        91.325,
+        193.619
+      ],
+      "sha256": "dfda1e539ec99cde65b9fae99fa0320190c782a933a6b6ac01c761b2d5ae3f3b"
+    },
+    {
+      "id": "gripper-cover",
+      "name": "Gripper cover",
+      "group": "pedals",
+      "file": "mechanical/pedals/Gripper Cover.stl",
+      "render": "renders/gripper-cover.png",
+      "role": "Pedal-frame retention: mating cover for the gripper clamp around the steering column, securing the wooden pedal-actuator frame against lift.",
+      "triangles": 1440,
+      "dimensions": [
+        91.325,
+        28.3,
+        69.5
+      ],
+      "sha256": "1249145dceddef4fd9dbf0416ddd82a8a0f93c7bda68e0cd5360cd2b32e6921d"
+    },
+    {
+      "id": "steering-column-mount",
+      "name": "Steering column mount",
+      "group": "steering",
+      "file": "mechanical/steering/Steering Column Mount.stl",
+      "render": "renders/steering-column-mount.png",
+      "role": "Steering assembly: mounting bracket at the steering column.",
+      "triangles": 1818,
+      "dimensions": [
+        130.0,
+        248.0,
+        214.0
+      ],
+      "sha256": "b0db6a14f9ad5b589967d040a0bc2e4d94d40576b082e0ba6daeae2221b223d4"
+    },
+    {
+      "id": "motor",
+      "name": "Steering motor and controller model",
+      "group": "steering",
+      "file": "mechanical/steering/Motor.stl",
+      "render": "renders/motor.png",
+      "role": "Steering assembly: supplied motor and controller geometry for packaging and fit reference; not identified as a printable custom part.",
+      "triangles": 168814,
+      "dimensions": [
+        91.7,
+        100.0,
+        85.425
+      ],
+      "sha256": "fb4abd0a5dd0830add84318cec72c318ca88ebebdf7d5a5f9eb271b01036e44d"
+    },
+    {
+      "id": "motor-belt-pulley",
+      "name": "Motor belt pulley",
+      "group": "steering",
+      "file": "mechanical/steering/Motor Belt Pulley.stl",
+      "render": "renders/motor-belt-pulley.png",
+      "role": "Steering belt drive: pulley on the motor side.",
+      "triangles": 7100,
+      "dimensions": [
+        60.0,
+        59.972,
+        31.0
+      ],
+      "sha256": "dc12ee4e538118cdb9fd57e3a1e6ba5bdae10c0db3b4f7367aa07b587293c398"
+    },
+    {
+      "id": "idler-tensioner-body",
+      "name": "Idler tensioner body",
+      "group": "steering",
+      "file": "mechanical/steering/Idler Tensioner Body.stl",
+      "render": "renders/idler-tensioner-body.png",
+      "role": "Steering belt drive: body of the idler/tensioner assembly.",
+      "triangles": 4568,
+      "dimensions": [
+        161.0,
+        30.0,
+        117.0
+      ],
+      "sha256": "9d5c664177b57f92e448aa99c3776ec863c093c1b0869de73858afc8260f63a7"
+    },
+    {
+      "id": "idler-tensioner-cover",
+      "name": "Idler tensioner cover",
+      "group": "steering",
+      "file": "mechanical/steering/Idler Tensioner Cover.stl",
+      "render": "renders/idler-tensioner-cover.png",
+      "role": "Steering belt drive: cover for the idler/tensioner assembly.",
+      "triangles": 1368,
+      "dimensions": [
+        127.0,
+        30.0,
+        6.5
+      ],
+      "sha256": "23e8d17ae3bc767a227061e1526c4c894dc190157ee1e1ec3b7e3939248d35d1"
+    },
+    {
+      "id": "chestplate-mount",
+      "name": "Chestplate mount",
+      "group": "steering",
+      "file": "mechanical/steering/Chestplate Mount.stl",
+      "render": "renders/chestplate-mount.png",
+      "role": "Steering-wheel interface: chestplate fitted over the steering wheel to transmit the steering drive and turn the wheel.",
+      "triangles": 17814,
+      "dimensions": [
+        231.0,
+        164.0,
+        133.5
+      ],
+      "sha256": "55d272e14be4437f75e34f51d458c99628e363d6b91766d0c75fdc384f3e5d0e"
+    },
+    {
+      "id": "chestplate-cover",
+      "name": "Chestplate cover",
+      "group": "steering",
+      "file": "mechanical/steering/Chestplate Cover.stl",
+      "render": "renders/chestplate-cover.png",
+      "role": "Steering-wheel interface: cover for the chestplate assembly fitted over the steering wheel.",
+      "triangles": 820,
+      "dimensions": [
+        231.0,
+        164.0,
+        8.0
+      ],
+      "sha256": "83230e28a243cd7b3f4768d8ed216b434dfb2e68e659e195a5e6631cd6e0c152"
+    },
+    {
+      "id": "cam-to-cart-mount",
+      "name": "Camera-to-cart mount",
+      "group": "cameras",
+      "file": "mechanical/cameras/Cam to Cart Mount.stl",
+      "render": "renders/cam-to-cart-mount.png",
+      "role": "Camera rig: mounting interface between a camera bracket and the cart.",
+      "triangles": 1300,
+      "dimensions": [
+        71.0,
+        71.0,
+        19.0
+      ],
+      "sha256": "4f05bc9fcfe02fea9867b0c24c7d1d26654e1c02fc07e949c63459c1b6636139"
+    },
+    {
+      "id": "front-cam-attachment",
+      "name": "Front camera attachment",
+      "group": "cameras",
+      "file": "mechanical/cameras/Front Cam Attachment.stl",
+      "render": "renders/front-cam-attachment.png",
+      "role": "Front camera rig: attachment plate/interface.",
+      "triangles": 1820,
+      "dimensions": [
+        71.0,
+        56.996,
+        21.0
+      ],
+      "sha256": "ac602f96ebb742a41bd810a38aa6b5054ba1971f9d369f30b9686ce11b404eb4"
+    },
+    {
+      "id": "front-cam-holder",
+      "name": "Front camera holder",
+      "group": "cameras",
+      "file": "mechanical/cameras/Front Cam Holder.stl",
+      "render": "renders/front-cam-holder.png",
+      "role": "Front camera rig: camera holder.",
+      "triangles": 2412,
+      "dimensions": [
+        103.0,
+        47.0,
+        51.0
+      ],
+      "sha256": "ba5c4f34e67f49815b84c40c35fddc44d159d318e93959bf581d820b22102544"
+    },
+    {
+      "id": "front-cam-cap",
+      "name": "Front camera cap",
+      "group": "cameras",
+      "file": "mechanical/cameras/Front Cam Cap.stl",
+      "render": "renders/front-cam-cap.png",
+      "role": "Front camera rig: cap for the front camera holder.",
+      "triangles": 204,
+      "dimensions": [
+        47.0,
+        32.0,
+        13.0
+      ],
+      "sha256": "4f6b9d11b65ea62a2f25336c0c21e33e5139d4dac9a29dd76225660ddbdd4163"
+    },
+    {
+      "id": "front-wide-cam-holder",
+      "name": "Front wide-camera holder",
+      "group": "cameras",
+      "file": "mechanical/cameras/Front Wide Cam Holder.stl",
+      "render": "renders/front-wide-cam-holder.png",
+      "role": "Front wide-angle camera: camera holder.",
+      "triangles": 3168,
+      "dimensions": [
+        71.0,
+        47.0,
+        22.0
+      ],
+      "sha256": "8e95d40da9ac7e72b075f318941995043b9bd6fd03085601dfc46b0aad44c540"
+    },
+    {
+      "id": "side-cam-holder",
+      "name": "Side camera holder",
+      "group": "cameras",
+      "file": "mechanical/cameras/Side Cam Holder.stl",
+      "render": "renders/side-cam-holder.png",
+      "role": "Side-facing camera rig: camera holder.",
+      "triangles": 3280,
+      "dimensions": [
+        71.0,
+        47.0,
+        22.0
+      ],
+      "sha256": "d804693797a23ce5b881aca7f21f0dd3041aac30c8d99f7528c8ce6f11e5db93"
+    },
+    {
+      "id": "pvc-cam-holder-norm",
+      "name": "PVC camera holder, normal",
+      "group": "cameras",
+      "file": "mechanical/cameras/PVC Cam Holder Norm.stl",
+      "render": "renders/pvc-cam-holder-norm.png",
+      "role": "PVC camera rig: normal variant of the tube-mounted bracket.",
+      "triangles": 2830,
+      "dimensions": [
+        71.0,
+        107.0,
+        45.4
+      ],
+      "sha256": "636bd75839217412db10bda6ff243beb957297d20a5d1fa30ede5114bc188cc5"
+    },
+    {
+      "id": "pvc-cam-holder-left",
+      "name": "PVC camera holder, left",
+      "group": "cameras",
+      "file": "mechanical/cameras/PVC Cam Holder Left.stl",
+      "render": "renders/pvc-cam-holder-left.png",
+      "role": "PVC camera rig: left variant of the tube-mounted bracket.",
+      "triangles": 1948,
+      "dimensions": [
+        71.0,
+        76.015,
+        76.957
+      ],
+      "sha256": "2e87a047d7c485ac9c3b0694265130a33ddcdb7f9892c7d6f196d04961d6f4c0"
+    },
+    {
+      "id": "pvc-cam-holder-right",
+      "name": "PVC camera holder, right",
+      "group": "cameras",
+      "file": "mechanical/cameras/PVC Cam Holder Right.stl",
+      "render": "renders/pvc-cam-holder-right.png",
+      "role": "PVC camera rig: right variant of the tube-mounted bracket.",
+      "triangles": 1950,
+      "dimensions": [
+        71.0,
+        76.025,
+        76.957
+      ],
+      "sha256": "9d433961af3aa50e7c778cad9d458b912257e376e0b30df75f19a78b11f6a98e"
+    },
+    {
+      "id": "front-cam-holder-old",
+      "name": "Front camera holder, old revision",
+      "group": "cameras",
+      "file": "mechanical/cameras/Front Cam Holder (OLD).stl",
+      "render": "renders/front-cam-holder-old.png",
+      "role": "Earlier front camera holder export; retained separately from the unmarked revision.",
+      "triangles": 1736,
+      "dimensions": [
+        103.0,
+        71.0,
+        53.0
+      ],
+      "sha256": "780224b9a4c4905a25a589e66a9d8d47832a92920771e03d613723c3e37f303f"
+    },
+    {
+      "id": "front-connector",
+      "name": "Front connector",
+      "group": "cameras",
+      "file": "mechanical/cameras/Front Connector.stl",
+      "render": "renders/front-connector.png",
+      "role": "Front camera mounting: holds the front camera in place with a vibration damper.",
+      "triangles": 2718,
+      "dimensions": [
+        65.7,
+        60.0,
+        73.6
+      ],
+      "sha256": "955cdf74a1b8d9a82bfa2b65d029b25221ba66a4139730c66740223102487e05"
+    },
+    {
+      "id": "front-connector-cap",
+      "name": "Front connector cap",
+      "group": "cameras",
+      "file": "mechanical/cameras/Front Connector Cap.stl",
+      "render": "renders/front-connector-cap.png",
+      "role": "Front camera mounting: cap for the vibration-damped front connector assembly.",
+      "triangles": 804,
+      "dimensions": [
+        60.0,
+        65.7,
+        5.0
+      ],
+      "sha256": "bd5f29a8a138aa8ca978b05856ff14c342fe203d4a6f7fad92b6b37be5eb0aa2"
+    },
+    {
+      "id": "back-connector",
+      "name": "Back connector",
+      "group": "cameras",
+      "file": "mechanical/cameras/Back Connector.stl",
+      "render": "renders/back-connector.png",
+      "role": "Rear camera mounting: holds the rear camera in place with a vibration damper.",
+      "triangles": 1966,
+      "dimensions": [
+        35.4,
+        60.0,
+        55.0
+      ],
+      "sha256": "8cb4cdc7fde8841323d08200cb3df4ec5905898590bdf7f58d2696c138b85c99"
+    },
+    {
+      "id": "gps-housing",
+      "name": "GPS housing",
+      "group": "sensors",
+      "file": "mechanical/sensors/GPS Housing.stl",
+      "render": "renders/gps-housing.png",
+      "role": "GPS sensor mounting: housing export includes the enclosure and a separate lid.",
+      "triangles": 936,
+      "dimensions": [
+        77.0,
+        18.0,
+        34.0
+      ],
+      "sha256": "388add50b17ce5e4cd8d2d8c3f0cc608e3acf2c54f22e53209697841e796dcb6"
+    },
+    {
+      "id": "imu-holster",
+      "name": "IMU holster",
+      "group": "sensors",
+      "file": "mechanical/sensors/IMU Holster.stl",
+      "render": "renders/imu-holster.png",
+      "role": "IMU sensor mounting: holster export includes the enclosure and a separate lid.",
+      "triangles": 668,
+      "dimensions": [
+        103.932,
+        44.976,
+        23.0
+      ],
+      "sha256": "04d05cbece729cde27351fd7440135cc5991a930d41ad0fae3b9ddd28be667c9"
+    },
+    {
+      "id": "monitor-mount",
+      "name": "Monitor mount",
+      "group": "accessories",
+      "file": "mechanical/accessories/Monitor Mount.stl",
+      "render": "renders/monitor-mount.png",
+      "role": "Operator display: mounting bracket for the monitor.",
+      "triangles": 724,
+      "dimensions": [
+        125.0,
+        38.33,
+        169.428
+      ],
+      "sha256": "36c3c4c6106a0ea57ba92fe1694b5396d8ca77125e6dd58350c6917fa1a0685f"
+    },
+    {
+      "id": "monitor-stand",
+      "name": "Monitor stand",
+      "group": "accessories",
+      "file": "mechanical/accessories/Monitor Stand.stl",
+      "render": "renders/monitor-stand.png",
+      "role": "Operator display: support stand for the monitor.",
+      "triangles": 2520,
+      "dimensions": [
+        109.0,
+        111.0,
+        82.5
+      ],
+      "sha256": "4de65049c45126498d2b302693e2fed2be836990fa25adf2eefb942cec8b47f4"
+    },
+    {
+      "id": "starlink-mount",
+      "name": "Starlink mount",
+      "group": "accessories",
+      "file": "mechanical/accessories/Starlink Mount.stl",
+      "render": "renders/starlink-mount.png",
+      "role": "Connectivity hardware: mount for the Starlink equipment.",
+      "triangles": 2588,
+      "dimensions": [
+        155.851,
+        155.845,
+        64.0
+      ],
+      "sha256": "d94b2dcd2400f333b1cfb110e5f6442d20f6d11590c55d88c0c95bdbbd0311de"
+    }
+  ]
+}
