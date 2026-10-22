@@ -137,7 +137,6 @@ When pot calibration or steering limits change, **edit both files**, or the firm
 
 ## Open TODOs (architecture-scope)
 
-- [ ] Extend `cart-api/tests/` with pytest coverage for pure-logic pieces (`effective_gas_cap`, steering conversions).
 - [ ] Move `ps5_drive.py` onto `cartlib` and into this repo.
 - [ ] Wire the software e-stop from Mega → Jetson so the ODrive gets idled when the Arduino reports an e-stop event (see [`estop.md`](./estop.md)).
 - [ ] Stable physical-camera ↔ logical-name mapping so USB enumeration order stops mattering (see [`cameras.md`](./cameras.md)).
