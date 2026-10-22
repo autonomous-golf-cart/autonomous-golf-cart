@@ -23,8 +23,9 @@
  * Host → Mega protocol (USB serial, 115200 8N1, newline-terminated):
  *   G <value>    set gas target,   value in [0.0 .. GAS_POT_MAX]
  *   B <value>    set brake target, value in [0.0 .. BRAKE_POT_MAX]
- *   S            stop: both targets = MIN (same effect as FAILSAFE)
+ *   S            stop: both targets = MIN (pedals released, still armed)
  *   H            heartbeat-only ping — no target change
+ *   D            graceful disarm: release both pedals, park the watchdog
  *   Any byte received also counts as an implicit heartbeat.
  *
  * Mega → Host telemetry:
