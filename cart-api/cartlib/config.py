@@ -1,9 +1,10 @@
 """
-cartlib.config — single source of truth for device ports and cart limits.
+cartlib.config — device ports, baud rates, and cart limits.
 
-The mechanical / software limits here are mirrored from the production cart
-firmware (``PRODUCTION/limits.py`` and ``sketches/common/cart_limits.h``).
-Keep them in sync if the hardware envelope ever changes.
+The mechanical / software limits are not defined here: they are loaded from
+the shared ``hardware/arduino-sketches/limits.py`` (mirrored in C by
+``sketches/common/cart_limits.h``) and re-exported, so cartlib can't drift
+from the numbers the firmware side uses.
 
 Device discovery prefers the stable ``/dev/serial/by-id/`` symlinks so the
 library doesn't care whether the GPS, ODrive, and Arduino enumerate as
@@ -13,7 +14,28 @@ ttyACM0/1/2 in some other order after a reboot or re-plug.
 from __future__ import annotations
 
 import glob
+import importlib.util
 import os
+from pathlib import Path
+
+
+def _load_shared_limits():
+    """Import ``hardware/arduino-sketches/limits.py`` from the repo checkout.
+
+    That directory isn't a Python package (its name has a hyphen), so load
+    the file directly. cartlib is installed editable (``pip install -e``),
+    so the path resolves relative to this source file.
+    """
+    path = Path(__file__).resolve().parents[2] / "hardware" / "arduino-sketches" / "limits.py"
+    spec = importlib.util.spec_from_file_location("_cart_shared_limits", path)
+    if spec is None or not path.is_file():
+        raise ImportError(f"shared cart limits not found at {path}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+_limits = _load_shared_limits()
 
 # --------------------------------------------------------------------------
 # Serial port discovery
@@ -47,16 +69,17 @@ ODRIVE_BAUD = 115200    # ODrive USB-CDC ASCII protocol (baud is nominal over CD
 
 # --------------------------------------------------------------------------
 # Pedal actuator limits (normalized pot units, 0.0 = released)
-#   mirrored from PRODUCTION/limits.py
+#   from hardware/arduino-sketches/limits.py
 # --------------------------------------------------------------------------
-GAS_POT_MIN = 0.00
-GAS_POT_MAX = 0.68      # full throttle (actuator mechanical hard stop)
-BRAKE_POT_MIN = 0.00
-BRAKE_POT_MAX = 0.45    # full brake (actuator mechanical limit)
+GAS_POT_MIN = _limits.GAS_POT_MIN
+GAS_POT_MAX = _limits.GAS_POT_MAX      # full throttle (actuator mechanical hard stop)
+BRAKE_POT_MIN = _limits.BRAKE_POT_MIN
+BRAKE_POT_MAX = _limits.BRAKE_POT_MAX  # full brake (actuator mechanical limit)
 
-# Layered gas authority caps (see PRODUCTION/limits.py for the rationale).
-GLOBAL_SPEED_LIMIT = 0.45   # top-level governor, applies to everyone
-FSD_GAS_LIMIT = 0.36        # autonomy cap — 0.36 pot ≈ 12 mph (under 0.45 governor)
+# Layered gas authority caps (see limits.py for the rationale).
+GLOBAL_SPEED_LIMIT = _limits.GLOBAL_SPEED_LIMIT  # top-level governor, applies to everyone
+FSD_GAS_LIMIT = _limits.FSD_GAS_LIMIT            # autonomy cap
+effective_gas_cap = _limits.effective_gas_cap
 
 # Production open-loop speed calibration. The linear 5-8 mph regime is about
 # 0.24 gas pot at 8 mph, but low-speed commands need a floor to overcome
@@ -73,12 +96,14 @@ PEDAL_HEARTBEAT_TIMEOUT_MS = 300
 
 # --------------------------------------------------------------------------
 # Steering limits (ODrive S1 + M8325s through 3:1 HTD-5M belt)
-#   mirrored from PRODUCTION/limits.py
+#   from hardware/arduino-sketches/limits.py
 # --------------------------------------------------------------------------
-STEERING_BELT_RATIO = 3.0   # 3 motor turns = 1 steering-column turn
+STEERING_BELT_RATIO = _limits.STEERING_BELT_RATIO  # 3 motor turns = 1 steering-column turn
 # Steering-column soft limits. The cart rack physically supports ~±320°.
-STEERING_MIN_DEG = -320.0
-STEERING_MAX_DEG = 320.0
+STEERING_MIN_DEG = _limits.STEERING_MIN_DEG
+STEERING_MAX_DEG = _limits.STEERING_MAX_DEG
+steering_deg_to_motor_turns = _limits.steering_deg_to_motor_turns
+motor_turns_to_steering_deg = _limits.motor_turns_to_steering_deg
 
 # Scales the steering "straighten" (heading) term only — NOT the map needle,
 # which now leans by the wheel angle 1:1. The controller treats full lock
@@ -98,20 +123,6 @@ STEERING_TRAP_VEL = 4.0     # turns/s
 STEERING_TRAP_ACCEL = 8.0   # turns/s^2
 STEERING_TRAP_DECEL = 8.0   # turns/s^2
 
-
-def steering_deg_to_motor_turns(column_deg: float) -> float:
-    """Steering-column angle (deg) -> motor turns."""
-    return (column_deg / 360.0) * STEERING_BELT_RATIO
-
-
-def motor_turns_to_steering_deg(motor_turns: float) -> float:
-    """Motor turns -> steering-column angle (deg)."""
-    return (motor_turns / STEERING_BELT_RATIO) * 360.0
-
-
-def effective_gas_cap(mode_limit: float) -> float:
-    """Resolve the effective gas cap, clamped by hardware + global governor."""
-    return min(GAS_POT_MAX, GLOBAL_SPEED_LIMIT, mode_limit)
 
 
 def gas_for_mph(speed_mph: float) -> float:
