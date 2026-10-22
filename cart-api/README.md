@@ -41,7 +41,7 @@ pip install -r requirements.txt   # pyserial>=3.5
 ```
 cart_api/
 ├── cartlib/                 the library
-│   ├── config.py            ports, baud rates, limits (single source of truth)
+│   ├── config.py            ports, baud rates, limits (re-exported from limits.py)
 │   ├── gps.py               GpsReceiver — read RTK GPS fixes
 │   ├── ntrip.py             NtripClient — optional RTK corrections feeder
 │   ├── pedals.py            PedalController — gas + brake (+ heartbeat watchdog)
@@ -109,6 +109,7 @@ everything detected and readable. Last run on the cart:
   hardware `GAS_POT_MAX` 0.68 → `GLOBAL_SPEED_LIMIT` 0.45 → mode cap.
 - `examples/actuation_demo.py` moves real hardware and is fully opt-in; the
   `--gas` demo additionally requires `--i-understand-this-drives`.
-- Limits in `config.py` mirror the production firmware
-  ([`hardware/arduino-sketches/limits.py`](../hardware/arduino-sketches/limits.py), [`hardware/arduino-sketches/sketches/common/cart_limits.h`](../hardware/arduino-sketches/sketches/common/cart_limits.h)). Keep them in sync.
+- Limits are loaded by `config.py` from the shared
+  [`hardware/arduino-sketches/limits.py`](../hardware/arduino-sketches/limits.py), which is mirrored in C by
+  [`hardware/arduino-sketches/sketches/common/cart_limits.h`](../hardware/arduino-sketches/sketches/common/cart_limits.h). Edit those two files, not `config.py`.
 ```
