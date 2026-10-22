@@ -91,7 +91,7 @@ everything detected and readable. Last run on the cart:
 
 ### `PedalController` (`cartlib.pedals`)
 - `arm()` — leave failsafe (starts the 20 Hz heartbeat keeping the Mega armed)
-- `set_gas(v)` — `0..gas_cap` (**drives the cart**; default cap = `FSD_GAS_LIMIT` 0.25)
+- `set_gas(v)` — `0..gas_cap` (**drives the cart**; default cap = `FSD_GAS_LIMIT` 0.36)
 - `set_brake(v)` — `0..0.45` (always safe — only stops the cart)
 - `stop()` — release both pedals · `disarm()` — graceful shutdown
 - `.telemetry` → `{gas, brake, gas_target, brake_target, heartbeat_ms, failsafe, estop}`
