@@ -15,7 +15,7 @@ and throttle WITHOUT ever computing a GPS heading:
   * Throttle is cut to zero (with brake) at the goal.
 
 SAFETY — this AUTONOMOUSLY DRIVES THE CART. The follower:
-  * caps gas at ``gas_cap`` (default = FSD_GAS_LIMIT, 0.25),
+  * caps gas at ``gas_cap`` (default = FSD_GAS_LIMIT, 0.36),
   * stops on e-stop, on lost/old GPS, on excessive cross-track error, and at
     the final waypoint,
   * defaults to DRY-RUN (computes + prints, sends nothing) unless armed.
