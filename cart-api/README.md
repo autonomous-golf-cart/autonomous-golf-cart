@@ -50,8 +50,15 @@ cart_api/
 ├── examples/
 │   ├── read_all.py          live read-only dashboard
 │   └── actuation_demo.py    opt-in brake / steer / gas demos (MOVES HARDWARE)
+├── tests/                   hardware-free pytest suite (limits, steering math, geo)
 ├── selftest.py              read-only verification of all 3 subsystems
 └── requirements.txt
+```
+
+## Run the unit tests (no hardware)
+
+```bash
+python3 -m pytest tests/
 ```
 
 ## Verify the hardware (no motion)
