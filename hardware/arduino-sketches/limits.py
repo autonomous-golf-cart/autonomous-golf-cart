@@ -68,8 +68,8 @@ PS5_GAS_LIMIT = GLOBAL_SPEED_LIMIT
 
 # Cap used by the autonomy stack. At the bottom of the hierarchy on
 # purpose: the robot should drive slower than a human operator until it
-# has earned more authority.
-FSD_GAS_LIMIT = 0.25
+# has earned more authority. 0.36 pot ≈ 12 mph, under the 0.45 governor.
+FSD_GAS_LIMIT = 0.36
 
 
 # --- Steering (ODrive S1 + M8325s through HTD 5M belt). See docs/steering.md. ---
