@@ -87,7 +87,7 @@ Listed in order of authority. Each lower layer assumes the ones above it may fai
 |-----------------------|---------------------------------------------------------------------------|---------------------------------------------------|
 | Hardware e-stop       | 48 V battery cutoff button                                                | Anything, including the Jetson catching fire      |
 | Software e-stop (TBD) | NC button → Mega pin 2 INT0                                               | Passenger-reachable "please stop"                 |
-| Firmware watchdog     | `pedal_control.ino` retracts both pedals if host silent for 300 ms         | USB cable yanked, host crashes, host hangs        |
+| Firmware watchdog     | `pedal_control.ino` drops gas and applies full brake if host silent for 300 ms | USB cable yanked, host crashes, host hangs        |
 | Firmware pot limits   | Hard stops at `*_POT_MIN/MAX` regardless of commanded target               | Misbehaving host, parser bugs                     |
 | Host fault detection  | `PedalLink` aborts the loop on `SerialException`                          | Lost pedal link while still commanding steering   |
 | Planner staleness     | `segmentation/onboard/drive.py` cuts gas at once, brakes after 1 s        | Planner sidecar crashes or hangs                  |
