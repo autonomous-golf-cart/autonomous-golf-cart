@@ -3,8 +3,8 @@
  *
  * Closed-loop-ish (bang-bang with deadband) position control of both the
  * gas and brake linear actuators, plus a host-heartbeat watchdog that
- * forces both pedals to fully released if the USB link to the Jetson /
- * laptop drops.
+ * drops the gas and applies full brake if the USB link to the Jetson /
+ * laptop drops, and a software e-stop input on pin 2.
  *
  * WHY THIS EXISTS
  *   The Mega is powered from the cart's 5 V buck (off the 48 V pack), not
@@ -12,7 +12,7 @@
  *   crashes / hangs — the Mega keeps running and can keep driving the
  *   actuators at whatever target it last received. This sketch prevents
  *   that: any gap >= HEARTBEAT_TIMEOUT_MS in host traffic trips FAILSAFE,
- *   which drives both actuators to their MIN pot position (fully released)
+ *   which drives the gas to its MIN pot position and the brake to its MAX
  *   and holds them there until valid commands resume.
  *
  * Wiring (see docs/linear_actuators.md for the full map):
