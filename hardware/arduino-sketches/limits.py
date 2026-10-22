@@ -44,9 +44,9 @@ BRAKE_POT_MAX = 0.45  # full brake (mechanical limit of the actuator vs. pedal)
 
 # Per-actuator PWM duty (0..255) while moving. Higher = faster actuator
 # travel. The BTS7960 is a full H-bridge and the actuators are 12V-rated,
-# so 255 = full rail is safe; pick a lower value if you want softer motion.
-GAS_ACTUATOR_PWM = 255
-BRAKE_ACTUATOR_PWM = 255
+# so 255 = full rail is safe; the firmware runs at 230 for softer motion.
+GAS_ACTUATOR_PWM = 230
+BRAKE_ACTUATOR_PWM = 230
 
 
 # --- Gas authority hierarchy ------------------------------------------------
