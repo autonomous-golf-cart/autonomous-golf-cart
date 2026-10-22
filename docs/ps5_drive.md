@@ -59,7 +59,7 @@ Where:
 - **Heartbeat UI.** The readout shows `heartbeat OK / slow / STALE` with ms-since-last-successful-write. `STALE` means the firmware is about to fail safe on its own (`HEARTBEAT_TIMEOUT_S = 0.30`, matched to the firmware's 300 ms).
 - **Controller disconnect** (`JOYDEVICEREMOVED`) exits the loop cleanly.
 
-Combined effect: **yanking the USB cable stops the cart.** Host sees the write error (one frame), Arduino stops seeing bytes, and the firmware watchdog retracts both pedals ~300 ms later regardless of what the host does.
+Combined effect: **yanking the USB cable stops the cart.** Host sees the write error (one frame), Arduino stops seeing bytes, and the firmware watchdog releases the gas and applies full brake ~300 ms later regardless of what the host does.
 
 ---
 
