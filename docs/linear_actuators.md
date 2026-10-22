@@ -126,8 +126,9 @@ This is the sketch that actually runs on the cart — the `f`/`b`/`s` test sketc
 |-------------|----------------------------------------------------------------------|
 | `G <value>` | Set gas target pot value in `[0.0 .. GAS_POT_MAX]` (clamped).        |
 | `B <value>` | Set brake target pot value in `[0.0 .. BRAKE_POT_MAX]` (clamped).    |
-| `S`         | Stop: both targets = `POT_MIN` (same end-state as FAILSAFE).         |
+| `S`         | Stop: both targets = `POT_MIN` (pedals released, still armed).       |
 | `H`         | Heartbeat-only ping — don't touch targets, just pet the watchdog.    |
+| `D`         | Graceful disarm: release both pedals and park the watchdog.          |
 
 Any received byte also counts as an implicit heartbeat — the 50 Hz `G <v>\nB <v>\n` stream from `ps5_drive.py` keeps the link healthy without needing separate `H` pings.
 
