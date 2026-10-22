@@ -112,8 +112,8 @@ The soft angle limits and the belt ratio live in code in two mirrored places —
 
 | Constant (Python / C)                          | Value | Meaning                                     |
 |------------------------------------------------|-------|---------------------------------------------|
-| `STEERING_MIN_DEG`                             | -90.0 | Left soft limit, at the steering column     |
-| `STEERING_MAX_DEG`                             | +90.0 | Right soft limit, at the steering column    |
+| `STEERING_MIN_DEG`                             | -320.0 | Left soft limit, at the steering column    |
+| `STEERING_MAX_DEG`                             | +320.0 | Right soft limit, at the steering column   |
 | `STEERING_BELT_RATIO`                          | 3.0   | Motor turns per column turn (HTD 5M, 20T→60T) |
 
 - Python: [`limits.py`](../hardware/arduino-sketches/limits.py)
