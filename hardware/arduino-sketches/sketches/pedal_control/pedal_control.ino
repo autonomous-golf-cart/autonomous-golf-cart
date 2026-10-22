@@ -69,7 +69,7 @@ const float DEADBAND = 0.015f;
 
 // ---- Heartbeat watchdog -------------------------------------------------
 // If no byte has been received from the host for this long, drop into
-// FAILSAFE and retract both pedals to their MIN pot position. 300 ms is
+// FAILSAFE: gas to its MIN pot position, brake to its MAX. 300 ms is
 // ~15x the 50 Hz host control period — tolerant of a stutter, tight
 // enough that a human can't react faster than the cart will stop.
 const unsigned long HEARTBEAT_TIMEOUT_MS = 300UL;
