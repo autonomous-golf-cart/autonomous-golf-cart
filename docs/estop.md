@@ -40,17 +40,23 @@ Pin 2 is configured as `INPUT_PULLUP`. With the NC contacts:
 
 Using NC contacts means a cut wire, bad crimp, or unplugged connector all read as "e-stop pressed." This is the correct fail-safe direction.
 
-### Behavior the firmware will eventually drive
+### Firmware behavior (`pedal_control.ino`)
 
-**Not yet defined.** Open TODOs:
+The cart's pedal firmware, [`sketches/pedal_control/pedal_control.ino`](../hardware/arduino-sketches/sketches/pedal_control/pedal_control.ino), handles the software e-stop:
 
-- [ ] On software-e-stop, what does the Arduino do with the gas/brake actuators? (Likely: gas → retract, brake → forward, both at a chosen PWM.)
-- [ ] How does the Arduino signal the Jetson to put steering in `IDLE`? (Serial message, GPIO line, ROS topic?)
-- [ ] What does "clear / reset" look like from the software e-stop state? (Release button + explicit user confirmation?)
+- **Detection.** A `RISING` ISR on pin 2 (INT0) flags a press, debounced at 50 ms (`ESTOP_DEBOUNCE_MS`). `checkEstop()` also polls the pin every loop, using the same debounce window, so it sees both press and release. The polled read catches the release, and the ISR flag catches a press that happens while `loop()` is blocked.
+- **Boot.** The pin is read once in `setup()`. If the button is already pressed (or the wire is broken), the sketch boots with the e-stop active and prints `EVT,ESTOP,1`.
+- **Pedals.** While the e-stop is active, the gas target is forced to `GAS_POT_MIN` and the brake target to `BRAKE_POT_MAX`. `checkEstop()` runs after `pumpSerial()` and reapplies the override on every loop, so a host `G`/`B` command can't override it. This holds even if the host has gone silent.
+- **Reporting to the host.** Each state change prints `EVT,ESTOP,1` or `EVT,ESTOP,0`, followed by an `INFO,` line. Every `STAT,` line carries `es=<0|1>`, which `cartlib` parses into `pedals.telemetry["estop"]`. `PathFollower.step()` aborts the drive when that flag is set.
+- **Release.** When the button is released, the override stops, but the targets stay at brake = max and gas = 0. They only change once the host sends new commands. No separate confirmation step is required.
+
+Open TODO:
+
+- [ ] Idle the steering ODrive on the Jetson side when `estop` goes true. Today the follower stops pushing pedal commands, but nothing puts the ODrive into `IDLE`.
 
 ### Arduino test sketch
 
-This is the current test firmware — it doesn't actuate anything, it just prints state changes and a 1 Hz heartbeat so you can confirm the button, ISR, and debounce all work.
+This is the standalone bench-test sketch for the button. It doesn't actuate anything. It just prints state changes and a 1 Hz heartbeat so you can confirm the button, ISR, and debounce all work.
 
 ```cpp
 /*
@@ -153,4 +159,4 @@ Both are intentional:
 - The **ISR** (`RISING` edge on INT0) catches the press even if `loop()` is blocked for longer than a serial print or a `delay()`. Debounced at 50 ms.
 - The **polled edge check** in `loop()` prints *state changes* in both directions (pressed **and** released), which the rising-edge-only ISR won't see.
 
-In the real firmware, the ISR flag is what matters — it's the thing that gates motion. The polled print is just for observability during bench testing.
+`pedal_control.ino` uses the same split. The debounced polled state (`estop_active`) controls the pedal override, and the ISR flag latches a press the poll might have missed.
