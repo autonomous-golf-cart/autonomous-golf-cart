@@ -30,8 +30,9 @@
  *
  * Mega → Host telemetry:
  *   INFO,<text>                        boot / arming messages
- *   STAT,g=<pot>,b=<pot>,tg=<tgt>,tb=<tgt>,hb=<age_ms>,fs=<0|1>
+ *   STAT,g=<pot>,b=<pot>,tg=<tgt>,tb=<tgt>,hb=<age_ms>,fs=<0|1>,es=<0|1>
  *                                      sent every STATUS_INTERVAL_MS
+ *   EVT,ESTOP,<0|1>                    software e-stop pressed / released
  *   ERR,<text>                         parse errors, limit hits, etc.
  */
 
