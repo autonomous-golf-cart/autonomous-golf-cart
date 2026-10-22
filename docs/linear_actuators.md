@@ -110,9 +110,7 @@ While running, the sketch streams `voltage | normalized` on every loop so you ca
 - Software pot-limit stops prevent the actuator from driving past mechanical hard stops.
 - **Hardware e-stop** (48 V battery cutoff) kills both actuators instantly along with everything else on the cart — see [`estop.md`](./estop.md).
 - **Host-heartbeat watchdog** (the combined pedal firmware, below). The Mega is powered from the cart's 5 V buck, not from USB, so a yanked host cable does **not** power-cycle it — without a watchdog it would happily hold whatever throttle/brake target it last received. The `pedal_control.ino` sketch detects ~300 ms of silence from the host, retracts both pedals to their `POT_MIN`, and stays in FAILSAFE until valid commands resume. The Python side (`scripts/ps5_drive.py`) also detects `SerialException` on write and aborts the control loop so steering doesn't keep moving an uncommanded cart.
-- The **software e-stop** button on Arduino pin 2 is intended to trigger a graceful stop (brake → forward, gas → backward). **Exact reaction is still TBD** — the combined sketch (below) reserves the pin but doesn't implement the ISR yet.
-
-**Open TODO:** integrate e-stop handling (pin 2 INT0) into `pedal_control.ino` so a button press forces `driveForward()` on brake and `driveBackward()` on gas and ignores serial commands until the e-stop is released.
+- The **software e-stop** button on Arduino pin 2 is handled by `pedal_control.ino` with a debounced ISR plus a polled check. While it's pressed, the brake target is forced to `BRAKE_POT_MAX` and the gas target to `GAS_POT_MIN`, overriding any `G`/`B` commands from the host. See [`estop.md`](./estop.md#firmware-behavior-pedal_controlino).
 
 ---
 
