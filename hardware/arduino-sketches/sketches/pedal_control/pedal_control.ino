@@ -364,7 +364,7 @@ void setup() {
   last_host_byte_ms = millis() - HEARTBEAT_TIMEOUT_MS - 1;
 
   Serial.println(F("INFO,Cart FSD pedal_control starting"));
-  Serial.println(F("INFO,protocol: G<f>\\n | B<f>\\n | S\\n | H\\n  (any byte = heartbeat)"));
+  Serial.println(F("INFO,protocol: G<f>\\n | B<f>\\n | S\\n | H\\n | D\\n  (any byte = heartbeat)"));
   Serial.print  (F("INFO,heartbeat timeout = ")); Serial.print(HEARTBEAT_TIMEOUT_MS);
   Serial.println(F(" ms"));
   Serial.print  (F("INFO,e-stop pin = ")); Serial.print(ESTOP_PIN);
