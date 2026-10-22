@@ -144,7 +144,8 @@ Any received byte also counts as an implicit heartbeat — the 50 Hz `G <v>\nB <
 
 - `HEARTBEAT_TIMEOUT_MS = 300` (≈ 15× the 50 Hz host control period).
 - **Boot state is FAILSAFE** — the sketch refuses to move either actuator until the host sends at least one valid command. This makes it safe to plug the Mega in before the Jetson is ready.
-- Any gap ≥ `HEARTBEAT_TIMEOUT_MS` between received bytes → FAILSAFE: both targets set to `POT_MIN`, actuators driven backward until they retract, then held stopped. An `ERR,heartbeat timeout` line is emitted on the transition.
+- Any gap ≥ `HEARTBEAT_TIMEOUT_MS` between received bytes → FAILSAFE: gas target set to `GAS_POT_MIN` and brake target to `BRAKE_POT_MAX`, so the cart brakes instead of coasting. An `ERR,heartbeat timeout` line is emitted on the transition.
+- A host that is shutting down on purpose sends `D` first: both pedals are released and the watchdog is parked, so the brake doesn't engage when the host goes quiet.
 - Any valid command line clears FAILSAFE automatically (logs `INFO,armed`).
 
 ### Control behavior
