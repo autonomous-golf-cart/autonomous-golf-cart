@@ -33,7 +33,7 @@ autonomous-golf-cart/
 │   │   ├── gps.py, ntrip.py       # u-blox RTK receiver + NTRIP corrections
 │   │   ├── follow.py              # pure-pursuit path follower used by `cart drive`
 │   │   ├── server.py              # WebSocket bridge for the RTK map UI
-│   │   └── config.py              # ports + limits used at runtime
+│   │   └── config.py              # ports + re-exports limits.py
 │   ├── cart                       # CLI: test / read / record / drive / serve
 │   ├── examples/  tests/
 ├── policies/                      # driving policies; each one drives through cartlib
@@ -124,25 +124,19 @@ Mechanics:
 
 ## Cross-cutting: limits stay mirrored between Python and C
 
-Three files hold the same limits:
+Two files hold the same limits:
 
-- [`limits.py`](../hardware/arduino-sketches/limits.py): the reference Python copy.
+- [`limits.py`](../hardware/arduino-sketches/limits.py): the Python copy.
 - [`sketches/common/cart_limits.h`](../hardware/arduino-sketches/sketches/common/cart_limits.h): what every Arduino sketch `#include`s.
-- [`cartlib/config.py`](../cart-api/cartlib/config.py): what the policies actually use at runtime.
 
-When pot calibration or steering limits change, **edit all three** or one side will silently trust numbers the others have stopped believing.
+[`cartlib/config.py`](../cart-api/cartlib/config.py) loads `limits.py` and re-exports its values, so policies get the same numbers at runtime without keeping a copy of their own.
 
-> [!WARNING]
-> They currently disagree. `FSD_GAS_LIMIT` is 0.36 in `cartlib/config.py` and
-> 0.25 in `limits.py`. Steering limits are ±320° in `cartlib/config.py`, ±270°
-> in `limits.py`, and ±90° in `cart_limits.h`. Actuator PWM is 255 in
-> `limits.py` and 230 in `cart_limits.h`.
+When pot calibration or steering limits change, **edit both files**, or the firmware and the host will each enforce different limits without any error.
 
 ---
 
 ## Open TODOs (architecture-scope)
 
-- [ ] Reconcile `cartlib/config.py` with `limits.py` / `cart_limits.h` (see the warning above), ideally by having `cartlib` import one shared copy.
 - [ ] Extend `cart-api/tests/` with pytest coverage for pure-logic pieces (`effective_gas_cap`, steering conversions).
 - [ ] Move `ps5_drive.py` onto `cartlib` and into this repo.
 - [ ] Wire the software e-stop from Mega → Jetson so the ODrive gets idled when the Arduino reports an e-stop event (see [`estop.md`](./estop.md)).
