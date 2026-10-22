@@ -17,13 +17,15 @@ proportional steering law produces the right SIGN and sensible MAGNITUDE:
   5. Cross-track abort fires when the cart is parked far off the path.
   6. Goal arrival fires (done) at the last waypoint.
 
-Run: python3 tests/test_follow_sim.py
+Run: python3 -m pytest tests/test_follow_sim.py
 """
 
 import math
 import os
 import sys
 import time
+
+import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -92,105 +94,80 @@ def turning_path(sign, n=20, step=1.0, curve=4.0):
     return pts
 
 
-# --- test driver -----------------------------------------------------------
-PASS, FAIL = "\033[32mPASS\033[0m", "\033[31mFAIL\033[0m"
-results = []
-
-
-def check(name, cond, detail=""):
-    results.append(cond)
-    print(f"  [{PASS if cond else FAIL}] {name}" + (f"  ({detail})" if detail else ""))
-
-
-def prime_heading(follower, gps, path, step_m=0.7):
+def prime_heading(follower, gps, step_m=0.7):
     """Walk the cart up the first ~few metres of the path so the follower
     establishes a northward heading and enters the tracking phase."""
     last = None
     for i in range(8):
-        p = offset(ORIGIN, 0.0, i * step_m)
-        gps.place(*p)
-        tele = follower.step()
-        last = tele
+        gps.place(*offset(ORIGIN, 0.0, i * step_m))
+        last = follower.step()
     return last
 
 
-def run_case(name, path, expect, **cfg_overrides):
+def tracking_step(path, **cfg_overrides):
+    """Prime a follower on ``path``, park the cart 5 m up, take one step."""
     cart = StubCart()
     cfg = FollowConfig(require_rtk=False, rate_hz=1000, **cfg_overrides)
     f = PathFollower(cart, path, cfg, armed=False)
-    tele = prime_heading(f, cart.gps, path)
-
-    # Now park the cart at the start region and take one tracking step.
+    prime_heading(f, cart.gps)
     cart.gps.place(*offset(ORIGIN, 0.0, 5.0))
-    tele = f.step()
-    print(f"\n{name}: phase={tele['phase']} heading={tele['heading_deg']} "
-          f"alpha={tele['alpha']} steer={tele['steer_cmd']} gas={tele['gas']}")
-    expect(tele)
-    return tele
+    return f.step()
 
 
-def main():
-    print("PathFollower tracking-phase simulation\n" + "=" * 42)
+# --- tests -----------------------------------------------------------------
+def test_straight_path_tracks_north_with_no_steer():
+    t = tracking_step(straight_path_north())
+    assert t["phase"] == "tracking"
+    assert t["heading_deg"] is not None
+    assert abs(t["heading_deg"]) < 8 or abs(t["heading_deg"] - 360) < 8
+    assert abs(t["steer_cmd"]) < 3.0
 
-    # 1. heading establishes + straight tracking ~0 steer
-    def straight_expect(t):
-        check("enters tracking phase", t["phase"] == "tracking", t["phase"])
-        check("heading ~ north (0deg)",
-              t["heading_deg"] is not None and (abs(t["heading_deg"]) < 8 or abs(t["heading_deg"] - 360) < 8),
-              str(t["heading_deg"]))
-        check("steer near zero on straight", abs(t["steer_cmd"]) < 3.0, str(t["steer_cmd"]))
-    straight = run_case("STRAIGHT", straight_path_north(), straight_expect)
 
-    # 2. left turn -> negative steer
-    def left_expect(t):
-        check("tracking", t["phase"] == "tracking", t["phase"])
-        check("alpha negative (target left of heading)", t["alpha"] < -1, str(t["alpha"]))
-        check("steer NEGATIVE for left turn", t["steer_cmd"] < -1, str(t["steer_cmd"]))
-    left = run_case("LEFT TURN", turning_path(-1), left_expect)
+def test_left_turn_steers_negative():
+    t = tracking_step(turning_path(-1))
+    assert t["phase"] == "tracking"
+    assert t["alpha"] < -1, "target should be left of heading"
+    assert t["steer_cmd"] < -1
 
-    # 3. right turn -> positive steer
-    def right_expect(t):
-        check("tracking", t["phase"] == "tracking", t["phase"])
-        check("alpha positive (target right of heading)", t["alpha"] > 1, str(t["alpha"]))
-        check("steer POSITIVE for right turn", t["steer_cmd"] > 1, str(t["steer_cmd"]))
-    right = run_case("RIGHT TURN", turning_path(+1), right_expect)
 
-    # 4. turn_slowdown defaults to 0 (hold speed); when set, gas backs off
-    print()
-    check("default turn_slowdown holds speed in turn",
-          right["gas"] == straight["gas"],
-          f"turn={right['gas']} straight={straight['gas']}")
-    slowed = run_case("RIGHT TURN (turn_slowdown=2)", turning_path(+1), right_expect,
-                      turn_slowdown=2.0)
-    check("gas backed off in turn with turn_slowdown",
-          slowed["gas"] < straight["gas"],
-          f"turn={slowed['gas']} straight={straight['gas']}")
+def test_right_turn_steers_positive():
+    t = tracking_step(turning_path(+1))
+    assert t["phase"] == "tracking"
+    assert t["alpha"] > 1, "target should be right of heading"
+    assert t["steer_cmd"] > 1
 
-    # 5. cross-track abort: park far off the path
-    print("\nCROSS-TRACK ABORT:")
+
+def test_default_turn_slowdown_holds_speed():
+    straight = tracking_step(straight_path_north())
+    turn = tracking_step(turning_path(+1))
+    assert turn["gas"] == pytest.approx(straight["gas"])
+
+
+def test_turn_slowdown_backs_off_gas_in_turn():
+    straight = tracking_step(straight_path_north(), turn_slowdown=2.0)
+    turn = tracking_step(turning_path(+1), turn_slowdown=2.0)
+    assert turn["gas"] < straight["gas"]
+
+
+def test_crosstrack_abort_when_far_off_path():
+    path = straight_path_north()
     cart = StubCart()
-    f = PathFollower(cart, straight_path_north(), FollowConfig(max_crosstrack_m=6.0), armed=False)
-    prime_heading(f, cart.gps, straight_path_north())
+    f = PathFollower(cart, path, FollowConfig(max_crosstrack_m=6.0), armed=False)
+    prime_heading(f, cart.gps)
     cart.gps.place(*offset(ORIGIN, 20.0, 5.0))  # 20 m east of a due-north path
     t = f.step()
-    check("aborts when off path", t["phase"] == "abort", f"{t['phase']} / {f.state.reason}")
+    assert t["phase"] == "abort", f.state.reason
 
-    # 6. goal arrival
-    print("\nGOAL ARRIVAL:")
+
+def test_done_at_goal():
     path = straight_path_north()
     cart = StubCart()
     f = PathFollower(cart, path, FollowConfig(goal_radius_m=1.5), armed=False)
-    prime_heading(f, cart.gps, path)
+    prime_heading(f, cart.gps)
     cart.gps.place(*path[-1])  # sit on the last waypoint
     t = f.step()
-    check("reports done at goal", t["phase"] == "done", f"{t['phase']} / {f.state.reason}")
-
-    print("\n" + "=" * 42)
-    ok = all(results)
-    print(f"{sum(results)}/{len(results)} checks passed -> "
-          f"{'ALL PASS' if ok else 'FAILURES'}")
-    sys.exit(0 if ok else 1)
+    assert t["phase"] == "done", f.state.reason
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(pytest.main([__file__, "-v"]))
