@@ -138,7 +138,8 @@ Any received byte also counts as an implicit heartbeat — the 50 Hz `G <v>\nB <
 | Prefix | Payload                                                                                                     |
 |--------|-------------------------------------------------------------------------------------------------------------|
 | `INFO,`| Boot / arming messages.                                                                                     |
-| `STAT,`| `g=<pot>,b=<pot>,tg=<tgt>,tb=<tgt>,hb=<age_ms>,fs=<0|1>` — emitted every 100 ms. `fs=1` means FAILSAFE. |
+| `STAT,`| `g=<pot>,b=<pot>,tg=<tgt>,tb=<tgt>,hb=<age_ms>,fs=<0|1>,es=<0|1>` — emitted every 100 ms. `fs=1` means FAILSAFE, `es=1` means the software e-stop is active. |
+| `EVT,` | `ESTOP,<0|1>` — emitted when the software e-stop is pressed or released.                                     |
 | `ERR,` | Parse errors, over-cap commands, line overflows, watchdog trips.                                            |
 
 ### Heartbeat watchdog
