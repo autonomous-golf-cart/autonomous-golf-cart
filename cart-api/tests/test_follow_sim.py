@@ -16,6 +16,7 @@ proportional steering law produces the right SIGN and sensible MAGNITUDE:
      cruise; with the default (0) it holds speed.
   5. Cross-track abort fires when the cart is parked far off the path.
   6. Goal arrival fires (done) at the last waypoint.
+  7. An e-stop reported by the pedal firmware aborts the drive.
 
 Run: python3 -m pytest tests/test_follow_sim.py
 """
@@ -167,6 +168,18 @@ def test_done_at_goal():
     cart.gps.place(*path[-1])  # sit on the last waypoint
     t = f.step()
     assert t["phase"] == "done", f.state.reason
+
+
+def test_estop_aborts_drive():
+    path = straight_path_north()
+    cart = StubCart()
+    f = PathFollower(cart, path, FollowConfig(require_rtk=False), armed=False)
+    prime_heading(f, cart.gps)
+    cart.pedals.telemetry = {"estop": True}
+    t = f.step()
+    assert t["phase"] == "abort"
+    assert t["gas"] == 0.0
+    assert "E-STOP" in f.state.reason
 
 
 if __name__ == "__main__":
