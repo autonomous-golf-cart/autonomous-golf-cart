@@ -11,7 +11,8 @@ and throttle WITHOUT ever computing a GPS heading:
     (cross, cross_rate) is a Stanley-style law that needs no world heading).
     The cart's own steering-wheel angle sensor closes the inner loop.
   * Throttle ramps toward ``max_speed_mph`` using the live GPS speed as
-    feedback, hard-capped at ``gas_cap`` and backed off in sharp turns.
+    feedback, hard-capped at ``gas_cap``. Backing off in sharp turns is
+    opt-in via ``turn_slowdown`` (default 0 = hold speed).
   * Throttle is cut to zero (with brake) at the goal.
 
 SAFETY — this AUTONOMOUSLY DRIVES THE CART. The follower:
