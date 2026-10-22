@@ -122,8 +122,6 @@ Subsystem documentation: [steering](../docs/steering.md) · [pedal actuators](..
 | [`tools/`](tools/) | Reproducible geometry renderer. |
 | [`arduino-sketches/`](arduino-sketches/) | Pedal control, watchdog, sensor-validation firmware, and upload tooling. See its [README](arduino-sketches/README.md). |
 | [`sensors/calibration/`](sensors/calibration/) | Camera intrinsics/extrinsics and calibration boards. |
-| [`electrical/`](electrical/) | Reserved for wiring diagrams, power distribution, and harness pinouts; no electrical drawings imported in this batch. |
-| [`pcb/`](pcb/) | Reserved for board designs and fabrication files; none imported in this batch. |
 
 ## Regenerate the renders
 

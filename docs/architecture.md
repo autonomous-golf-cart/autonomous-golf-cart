@@ -50,7 +50,7 @@ autonomous-golf-cart/
 │   │       ├── pedal_control/         # gas + brake firmware w/ heartbeat watchdog
 │   │       └── sensor_validation/     # GPS NMEA passthrough
 │   ├── sensors/calibration/       # camera intrinsics/extrinsics, ChArUco boards
-│   └── cad/  electrical/  mechanical/  pcb/
+│   └── cad/  mechanical/
 └── docs/
 ```
 
