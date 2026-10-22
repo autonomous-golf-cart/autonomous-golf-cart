@@ -32,8 +32,8 @@ static const uint8_t BRAKE_ACTUATOR_PWM = 230;
 static const float STEERING_BELT_RATIO = 3.0f;
 
 // Soft angle limits AT THE STEERING COLUMN (same frame as the steering wheel).
-// Provisional ±90° until mechanical lock-to-lock is measured.
-static const float STEERING_MIN_DEG = -90.0f;
-static const float STEERING_MAX_DEG =  90.0f;
+// The rack physically supports ~±320° lock-to-lock.
+static const float STEERING_MIN_DEG = -320.0f;
+static const float STEERING_MAX_DEG =  320.0f;
 
 #endif  // CART_LIMITS_H
