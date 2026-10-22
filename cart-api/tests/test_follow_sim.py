@@ -12,7 +12,8 @@ proportional steering law produces the right SIGN and sensible MAGNITUDE:
   2. Path turning LEFT ahead of a straight-heading cart -> steer NEGATIVE
      (left = CCW = negative column command, matching bearing/angle_diff sign).
   3. Path turning RIGHT -> steer POSITIVE.
-  4. Gas backs off in a sharp turn vs. straight cruise.
+  4. With turn_slowdown > 0, gas backs off in a sharp turn vs. straight
+     cruise; with the default (0) it holds speed.
   5. Cross-track abort fires when the cart is parked far off the path.
   6. Goal arrival fires (done) at the last waypoint.
 
@@ -113,9 +114,9 @@ def prime_heading(follower, gps, path, step_m=0.7):
     return last
 
 
-def run_case(name, path, expect):
+def run_case(name, path, expect, **cfg_overrides):
     cart = StubCart()
-    cfg = FollowConfig(require_rtk=False, rate_hz=1000)
+    cfg = FollowConfig(require_rtk=False, rate_hz=1000, **cfg_overrides)
     f = PathFollower(cart, path, cfg, armed=False)
     tele = prime_heading(f, cart.gps, path)
 
@@ -154,11 +155,16 @@ def main():
         check("steer POSITIVE for right turn", t["steer_cmd"] > 1, str(t["steer_cmd"]))
     right = run_case("RIGHT TURN", turning_path(+1), right_expect)
 
-    # 4. gas backs off in a turn vs straight cruise
+    # 4. turn_slowdown defaults to 0 (hold speed); when set, gas backs off
     print()
-    check("gas backed off in turn vs straight",
-          right["gas"] < straight["gas"],
+    check("default turn_slowdown holds speed in turn",
+          right["gas"] == straight["gas"],
           f"turn={right['gas']} straight={straight['gas']}")
+    slowed = run_case("RIGHT TURN (turn_slowdown=2)", turning_path(+1), right_expect,
+                      turn_slowdown=2.0)
+    check("gas backed off in turn with turn_slowdown",
+          slowed["gas"] < straight["gas"],
+          f"turn={slowed['gas']} straight={straight['gas']}")
 
     # 5. cross-track abort: park far off the path
     print("\nCROSS-TRACK ABORT:")
